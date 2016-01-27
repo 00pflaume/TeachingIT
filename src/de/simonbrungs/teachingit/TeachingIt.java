@@ -1,6 +1,11 @@
 package de.simonbrungs.teachingit;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 
 import de.simonbrungs.teachingit.api.Console;
@@ -8,7 +13,6 @@ import de.simonbrungs.teachingit.api.events.EventExecuter;
 import de.simonbrungs.teachingit.api.plugin.PluginManager;
 import de.simonbrungs.teachingit.api.theme.Theme;
 import de.simonbrungs.teachingit.commands.ShutDown;
-import de.simonbrungs.teachingit.utilities.config.ConfigLoader;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
 public class TeachingIt {
@@ -32,12 +36,11 @@ public class TeachingIt {
 
 	public TeachingIt() {
 		main = this;
-		ConfigLoader configLoader = new ConfigLoader();
-		if (configLoader.createConfig()) {
+		if (createConfig()) {
 			System.out.println(getPrefix() + "The Config was created. Please input your data into the config file.");
 			return;
 		}
-		config = configLoader.getConfig();
+		config = getConfig();
 		loadPlugins();
 		webserver = new Webserver(config.getProperty("WebServerPath"),
 				Integer.parseInt(config.getProperty("WebServerPort")));
@@ -94,5 +97,64 @@ public class TeachingIt {
 
 	public Theme getTheme() {
 		return theme;
+	}
+
+	public String getHomeDirectory() {
+		return config.getProperty("WebServerDomain") + config.getProperty("WebServerPath");
+	}
+
+	private boolean createConfig() {
+		Properties prop = new Properties();
+		OutputStream output = null;
+		try {
+			File file = new File("config.properties");
+			if (!file.exists()) {
+				output = new FileOutputStream(file);
+				prop.setProperty("WebServerDomain", "localhost");
+				prop.setProperty("WebServerPath", "/");
+				prop.setProperty("WebServerPort", "80");
+				prop.setProperty("MySQLHost", "localhost");
+				prop.setProperty("MySQLPort", "3306");
+				prop.setProperty("MySQLUser", "root");
+				prop.setProperty("MySQLPassword", "password");
+				prop.setProperty("MySQLDatabase", "TeachingIt");
+				prop.setProperty("MySQLTablePrefixes", "TIt_");
+				prop.store(output, null);
+				return true;
+			}
+			return false;
+		} catch (IOException io) {
+			io.printStackTrace();
+			return false;
+		} finally {
+			if (output != null) {
+				try {
+					output.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	private Properties getConfig() {
+		Properties prop = new Properties();
+		InputStream input = null;
+		try {
+			input = new FileInputStream("config.properties");
+			prop.load(input);
+			return prop;
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			return null;
+		} finally {
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

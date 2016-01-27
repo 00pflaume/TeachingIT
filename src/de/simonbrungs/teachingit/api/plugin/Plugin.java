@@ -1,11 +1,13 @@
 package de.simonbrungs.teachingit.api.plugin;
 
-public interface Plugin {
-	public abstract String getName();
+import java.util.Properties;
 
-	public abstract String getVersion();
+public abstract class Plugin {
+	Properties propertieFile;
 
-	public abstract String getAuthor();
+	public Plugin(Properties pPropertieFile) {
+		propertieFile = pPropertieFile;
+	}
 
 	public abstract void onEnable();
 

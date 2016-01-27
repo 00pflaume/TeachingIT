@@ -1,54 +1,96 @@
 package de.simonbrungs.teachingit.api.plugin;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
-
-import de.simonbrungs.teachingit.TeachingIt;
+import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class PluginManager {
 	ArrayList<Plugin> plugins = new ArrayList<>();
+	private String pluginManagerPrefix = "[PluginManager] ";
 
-	@SuppressWarnings("resource")
 	public void registerPlugin(File pPluginJar) {
-		URL[] urls = new URL[1];
-		try {
-			urls[0] = pPluginJar.toURI().toURL();
-			ClassLoader loader = new URLClassLoader(urls);
-			JarInputStream jaris = new JarInputStream(new FileInputStream(pPluginJar));
-			JarEntry entry;
-			while ((entry = jaris.getNextJarEntry()) != null) {
-				if (entry.getName().toLowerCase().endsWith(".class")) {
-					String className = entry.getName().substring(0, entry.getName().length() - 6).replace('/', '.');
-					Class<?> cls = loader.loadClass(className);
-					for (Class<?> i : cls.getInterfaces()) {
-						if (i.equals(Plugin.class)) {
-							plugins.add((Plugin) cls.newInstance());
-							break;
-						}
-					}
-				}
-			}
-			plugins.get(plugins.size() - 1).onEnable();
+		Properties propertieFile = getPropertieFile(pPluginJar);
+		if (propertieFile == null)
+			return;
+		if (!checkPropertieFile(propertieFile)) {
 			System.out.println(
-					TeachingIt.getInstance().getPrefix() + "The plugin " + plugins.get(plugins.size() - 1).getName()
-							+ " (version " + plugins.get(plugins.size() - 1).getVersion() + ") from "
-							+ plugins.get(plugins.size() - 1).getAuthor() + " was successfully enabled.");
+					pluginManagerPrefix + "The plugin propertie file is not correct. Needed information are missing");
+			return;
+		}
+		URLClassLoader loader = null;
+		try {
+			Plugin pluginInstance = null;
+			loader = new URLClassLoader(new URL[] { pPluginJar.toURI().toURL() });
+			Class<?> cl = Class.forName(propertieFile.getProperty("main"));
+			if (Plugin.class.isAssignableFrom(cl)) {
+				pluginInstance = (Plugin) cl.newInstance();
+			}
+			if (pluginInstance != null) {
+				pluginInstance.onEnable();
+				System.out.println(pluginManagerPrefix + "The plugin " + propertieFile.getProperty("name")
+						+ " (version " + propertieFile.getProperty("version") + ") from "
+						+ propertieFile.getProperty("author") + " was successfully enabled.");
+				plugins.add(pluginInstance);
+			} else {
+				System.out.println(pluginManagerPrefix
+						+ "The plugin could not be loaded. The given main class of the plugin does not "
+						+ " implement the interface \"Plugin\".");
+			}
+		} catch (ClassNotFoundException e) {
+			System.out.println(pluginManagerPrefix + "The given plugin \"" + propertieFile.getProperty("main")
+					+ "\" class could not be found.");
+			e.printStackTrace();
+		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
+			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
+			e.printStackTrace();
+		} finally {
+			try {
+				if (loader != null) {
+					loader.close();
+				}
+			} catch (IOException e) {
+				System.out.println(pluginManagerPrefix + "URLClassLoader could not be closed.");
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private Properties getPropertieFile(File pPluginJar) {
+		ZipFile zipFile = null;
+		Properties prop = new Properties();
+		try {
+			zipFile = new ZipFile(pPluginJar.getAbsolutePath());
+			ZipEntry propertieFileEntry = zipFile.getEntry("plugin.yml");
+			if (propertieFileEntry == null) {
+				return null;
+			}
+			InputStream stream = zipFile.getInputStream(propertieFileEntry);
+			prop.load(stream);
+			return prop;
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			return null;
+		} finally {
+			if (zipFile != null) {
+				try {
+					zipFile.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
+	}
 
+	private boolean checkPropertieFile(Properties pProperties) {
+		return pProperties.getProperty("main") != null && pProperties.getProperty("author") != null
+				&& pProperties.getProperty("version") != null && pProperties.getProperty("name") != null;
 	}
 
 }
