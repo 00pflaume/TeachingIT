@@ -8,7 +8,7 @@ public class CreateWebsite {
 		String header = "<html><head>";
 		HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent(header);
 		TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
-		return headerCreateEvent.getHeader() + TeachingIt.getInstance().getTheme().getHeader() + "</head>";
+		return headerCreateEvent.getHeader() + TeachingIt.getInstance().getTheme().getHeader();
 	}
 
 	public static String createBody() {

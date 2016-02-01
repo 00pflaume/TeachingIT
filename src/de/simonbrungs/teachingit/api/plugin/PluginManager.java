@@ -11,27 +11,83 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import de.simonbrungs.teachingit.api.theme.Theme;
+import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterd;
+
 public class PluginManager {
-	ArrayList<Plugin> plugins = new ArrayList<>();
+	private ArrayList<Plugin> plugins = new ArrayList<>();
 	private String pluginManagerPrefix = "[PluginManager] ";
+	private Theme theme = null;
+
+	public void registerTheme(File pThemeJar) throws ThemeAlreadyRegisterd {
+		if (this.theme != null)
+			throw new ThemeAlreadyRegisterd();
+		Properties propertieFile = getPropertieFile(pThemeJar);
+		if (propertieFile == null)
+			return;
+		if (!checkPropertieFile(propertieFile)) {
+			System.out.println(pluginManagerPrefix + "The Theme propertie file of " + pThemeJar.getName()
+					+ " is not correct. Needed information are missing");
+			return;
+		}
+		try {
+			Theme theme = null;
+			theme = (Theme) loadPlugin(pThemeJar, propertieFile, Theme.class);
+			if (theme != null) {
+				System.out.println(pluginManagerPrefix + "The Theme " + propertieFile.getProperty("name") + " (version "
+						+ propertieFile.getProperty("version") + ") from " + propertieFile.getProperty("author")
+						+ " was successfully loaded.");
+				this.theme = theme;
+
+			} else {
+				System.out.println(pluginManagerPrefix
+						+ "The plugin could not be loaded. The given main class of the plugin does not "
+						+ " extends the class \"Theme\".");
+			}
+		} catch (ClassNotFoundException e) {
+			System.out.println(pluginManagerPrefix + "The given plugin \"" + propertieFile.getProperty("main")
+					+ "\" class could not be found.");
+			e.printStackTrace();
+		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
+			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
+			e.printStackTrace();
+		}
+	}
+
+	private Object loadPlugin(File pPluginJar, Properties propertieFile, Class<?> pSearchedSuperClass)
+			throws InstantiationException, IllegalAccessException, ClassNotFoundException, MalformedURLException {
+		URLClassLoader loader = null;
+		try {
+			loader = new URLClassLoader(new URL[] { pPluginJar.toURI().toURL() });
+			Class<?> cl = Class.forName(propertieFile.getProperty("main"));
+			if (pSearchedSuperClass.isAssignableFrom(cl)) {
+				return cl.newInstance();
+			}
+			return null;
+		} finally {
+			try {
+				if (loader != null) {
+					loader.close();
+				}
+			} catch (IOException e) {
+				System.out.println(pluginManagerPrefix + "URLClassLoader could not be closed.");
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public void registerPlugin(File pPluginJar) {
 		Properties propertieFile = getPropertieFile(pPluginJar);
 		if (propertieFile == null)
 			return;
 		if (!checkPropertieFile(propertieFile)) {
-			System.out.println(
-					pluginManagerPrefix + "The plugin propertie file is not correct. Needed information are missing");
+			System.out.println(pluginManagerPrefix + "The plugin propertie file of " + pPluginJar.getName()
+					+ " is not correct. Needed information are missing");
 			return;
 		}
-		URLClassLoader loader = null;
 		try {
 			Plugin pluginInstance = null;
-			loader = new URLClassLoader(new URL[] { pPluginJar.toURI().toURL() });
-			Class<?> cl = Class.forName(propertieFile.getProperty("main"));
-			if (Plugin.class.isAssignableFrom(cl)) {
-				pluginInstance = (Plugin) cl.newInstance();
-			}
+			pluginInstance = (Plugin) loadPlugin(pPluginJar, propertieFile, Plugin.class);
 			if (pluginInstance != null) {
 				pluginInstance.onEnable();
 				System.out.println(pluginManagerPrefix + "The plugin " + propertieFile.getProperty("name")
@@ -50,16 +106,11 @@ public class PluginManager {
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
 			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
 			e.printStackTrace();
-		} finally {
-			try {
-				if (loader != null) {
-					loader.close();
-				}
-			} catch (IOException e) {
-				System.out.println(pluginManagerPrefix + "URLClassLoader could not be closed.");
-				e.printStackTrace();
-			}
 		}
+	}
+
+	public boolean isThemeRegisterd() {
+		return theme != null;
 	}
 
 	private Properties getPropertieFile(File pPluginJar) {
@@ -67,8 +118,9 @@ public class PluginManager {
 		Properties prop = new Properties();
 		try {
 			zipFile = new ZipFile(pPluginJar.getAbsolutePath());
-			ZipEntry propertieFileEntry = zipFile.getEntry("plugin.yml");
+			ZipEntry propertieFileEntry = zipFile.getEntry("properties.properties");
 			if (propertieFileEntry == null) {
+				System.out.println(pluginManagerPrefix + "Propertie file missing in " + pPluginJar.getName() + ".");
 				return null;
 			}
 			InputStream stream = zipFile.getInputStream(propertieFileEntry);

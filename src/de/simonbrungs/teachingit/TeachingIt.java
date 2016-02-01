@@ -22,7 +22,7 @@ public class TeachingIt {
 	private boolean shouldClose = false;
 	private Console console = new Console();
 	private PluginManager pluginManager = new PluginManager();
-	private String prefix = "[TeachingIt] ";
+	public final String PREFIX = "[TeachingIt] ";
 	private EventExecuter eventExecuter;
 	private Theme theme;
 
@@ -30,14 +30,14 @@ public class TeachingIt {
 		new TeachingIt();
 	}
 
-	public String getPrefix() {
-		return prefix;
+	public String getIncludeContentURL() {
+		return getHomeDirectory() + "include/";
 	}
 
 	public TeachingIt() {
 		main = this;
 		if (createConfig()) {
-			System.out.println(getPrefix() + "The Config was created. Please input your data into the config file.");
+			System.out.println(PREFIX + "The Config was created. Please input your data into the config file.");
 			return;
 		}
 		config = getConfig();
@@ -45,9 +45,9 @@ public class TeachingIt {
 		webserver = new Webserver(config.getProperty("WebServerPath"),
 				Integer.parseInt(config.getProperty("WebServerPort")));
 		registerCommands();
-		System.out.println(getPrefix() + "Now going to load plugins.");
-		System.out.println(getPrefix() + "Plugins loaded.");
-		System.out.println(getPrefix() + "The server is started");
+		System.out.println(PREFIX + "Now going to load plugins.");
+		System.out.println(PREFIX + "Plugins loaded.");
+		System.out.println(PREFIX + "The server is started");
 		console.commandsReader();
 	}
 
@@ -72,7 +72,7 @@ public class TeachingIt {
 		shouldClose = true;
 		if (webserver != null)
 			webserver.stop();
-		System.out.println(getPrefix() + "The server is now going to hold. Goodbye");
+		System.out.println(PREFIX + "The server is now going to hold. Goodbye");
 	}
 
 	public boolean getShouldClose() {
