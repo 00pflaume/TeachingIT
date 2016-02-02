@@ -13,6 +13,7 @@ import de.simonbrungs.teachingit.api.events.EventExecuter;
 import de.simonbrungs.teachingit.api.plugin.PluginManager;
 import de.simonbrungs.teachingit.api.theme.Theme;
 import de.simonbrungs.teachingit.commands.ShutDown;
+import de.simonbrungs.teachingit.utilities.ContentDownloader;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
 public class TeachingIt {
@@ -41,14 +42,19 @@ public class TeachingIt {
 			return;
 		}
 		config = getConfig();
-		loadPlugins();
-		webserver = new Webserver(config.getProperty("WebServerPath"),
-				Integer.parseInt(config.getProperty("WebServerPort")));
 		registerCommands();
 		System.out.println(PREFIX + "Now going to load plugins.");
+		loadPlugins();
 		System.out.println(PREFIX + "Plugins loaded.");
-		System.out.println(PREFIX + "The server is started");
-		console.commandsReader();
+		System.out.println(PREFIX + "Now going to load theme");
+		if (loadTheme()) {
+			System.out.println(PREFIX + "The server is started");
+			webserver = new Webserver(config.getProperty("WebServerPath"),
+					Integer.parseInt(config.getProperty("WebServerPort")));
+			console.commandsReader();
+		} else {
+			System.out.println(PREFIX + "The server is now going to hold.");
+		}
 	}
 
 	private void loadPlugins() {
@@ -62,6 +68,16 @@ public class TeachingIt {
 			}
 		}
 
+	}
+
+	private boolean loadTheme() {
+		final File folder = new File("plugins");
+		if (!folder.exists()) {
+			folder.mkdirs();
+			ContentDownloader contentDownloader = new ContentDownloader(
+					"http://simonsator.de/teachingit/theme/standarttheme.jar");
+		}
+		return true;
 	}
 
 	public PluginManager getPluginManager() {

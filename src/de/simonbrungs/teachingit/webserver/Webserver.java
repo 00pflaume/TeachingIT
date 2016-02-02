@@ -25,21 +25,14 @@ public class Webserver {
 		}
 	}
 
-	public void sendResponse(String pResponse, HttpExchange pHttpExchange) throws IOException {
-		pHttpExchange.sendResponseHeaders(200, pResponse.length());
-		OutputStream os = pHttpExchange.getResponseBody();
-		os.write(pResponse.getBytes());
-		os.close();
-	}
-
 	static class MyHandler implements HttpHandler {
 		@Override
 		public void handle(HttpExchange pHttpExchange) throws IOException {
 			WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(pHttpExchange);
 			TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
-			String response = CreateWebsite.createHeader();
-			response += CreateWebsite.createBody();
 			if (!websiteCallEvent.isCanceld()) {
+				String response = CreateWebsite.createHeader();
+				response += CreateWebsite.createBody() + "</body></html>";
 				pHttpExchange.sendResponseHeaders(200, response.length());
 				OutputStream os = pHttpExchange.getResponseBody();
 				os.write(response.getBytes());
