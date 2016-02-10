@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class EventExecuter {
 	ArrayList<ListenerEntry> registerdEvents = new ArrayList<>();
 
-	public void registerEventExecuter(Listener pListener, Class<Event> pClass, int pPriority) {
+	public void registerEventExecuter(Listener<?> pListener, Class<Event> pClass, int pPriority) {
 		ListenerEntry entry = new ListenerEntry(pListener, pClass, pPriority);
 		registerdEvents.add(entry);
 		sortByListenerPriority(registerdEvents);
@@ -47,10 +47,10 @@ public class EventExecuter {
 
 	private class ListenerEntry {
 		private int priority;
-		private Listener listener;
+		private Listener<Event> listener;
 		private Class<Event> eventClass;
 
-		public ListenerEntry(Listener pListener, Class<Event> pEvent, int pPriority) {
+		public ListenerEntry(Listener<?> pListener, Class<Event> pEvent, int pPriority) {
 			priority = pPriority;
 
 		}
@@ -59,7 +59,7 @@ public class EventExecuter {
 			return priority;
 		}
 
-		public Listener getExecutiveListener() {
+		public Listener<Event> getExecutiveListener() {
 			return listener;
 		}
 

@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import de.simonbrungs.teachingit.api.theme.Theme;
+import de.simonbrungs.teachingit.api.plugin.theme.Theme;
 import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterd;
 
 public class PluginManager {

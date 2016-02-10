@@ -1,19 +1,15 @@
-package de.simonbrungs.teachingit.api.theme;
+package de.simonbrungs.teachingit.api.plugin.theme;
 
 import java.util.ArrayList;
 import java.util.Properties;
 
 import de.simonbrungs.teachingit.api.navigator.NavigatorEntry;
+import de.simonbrungs.teachingit.api.plugin.Plugin;
 
-public abstract class Theme {
-	private Properties properties;
+public abstract class Theme extends Plugin {
 
-	public Theme(Properties pProperties) {
-		properties = pProperties;
-	}
-
-	public Properties getProperties() {
-		return properties;
+	public Theme(Properties pPropertieFile) {
+		super(pPropertieFile);
 	}
 
 	public abstract String getHeader();

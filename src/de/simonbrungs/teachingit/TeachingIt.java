@@ -11,8 +11,9 @@ import java.util.Properties;
 import de.simonbrungs.teachingit.api.Console;
 import de.simonbrungs.teachingit.api.events.EventExecuter;
 import de.simonbrungs.teachingit.api.plugin.PluginManager;
-import de.simonbrungs.teachingit.api.theme.Theme;
+import de.simonbrungs.teachingit.api.plugin.theme.Theme;
 import de.simonbrungs.teachingit.commands.ShutDown;
+import de.simonbrungs.teachingit.connection.MySQLConnection;
 import de.simonbrungs.teachingit.utilities.ContentDownloader;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
@@ -26,6 +27,8 @@ public class TeachingIt {
 	public final String PREFIX = "[TeachingIt] ";
 	private EventExecuter eventExecuter;
 	private Theme theme;
+	public final String CONTENTDOWNLOADURL = "http://simonsator.de/teachingit/";
+	private MySQLConnection con;
 
 	public static void main(String[] args) {
 		new TeachingIt();
@@ -57,6 +60,10 @@ public class TeachingIt {
 		}
 	}
 
+	public MySQLConnection getConnection() {
+		return con;
+	}
+
 	private void loadPlugins() {
 		final File folder = new File("plugins");
 		if (!folder.exists()) {
@@ -74,8 +81,8 @@ public class TeachingIt {
 		final File folder = new File("plugins");
 		if (!folder.exists()) {
 			folder.mkdirs();
-			ContentDownloader contentDownloader = new ContentDownloader(
-					"http://simonsator.de/teachingit/theme/standarttheme.jar");
+			ContentDownloader contentDownloader = new ContentDownloader(CONTENTDOWNLOADURL + "theme/standarttheme.jar",
+					"");
 		}
 		return true;
 	}
