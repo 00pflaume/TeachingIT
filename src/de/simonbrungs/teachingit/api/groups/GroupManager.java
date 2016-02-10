@@ -1,19 +1,25 @@
 package de.simonbrungs.teachingit.api.groups;
 
+import java.util.ArrayList;
+
 public class GroupManager {
-	public Group createGroup() {
+	public static Group createGroup() {
 
 	}
 
-	public void removeGroup() {
+	public static void removeGroup() {
 
 	}
 
-	public Group getGroup(int pID) {
+	public static Group getGroup(int pID) {
 
 	}
 
-	public Group getGroup(String pGroupName) {
+	public static Group getGroup(String pGroupName) {
+
+	}
+
+	public static ArrayList<Group> getGroups() {
 
 	}
 }

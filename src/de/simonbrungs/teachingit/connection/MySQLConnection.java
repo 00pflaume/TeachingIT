@@ -33,7 +33,7 @@ public class MySQLConnection {
 			preparedStatement.executeUpdate();
 			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + databasePrefix
 					+ "users` ( `user` VARCHAR(128) NOT NULL ," + " `email` VARCHAR(254) NOT NULL ,"
-					+ " `password` CHAR(32)," + " `id` INT NOT NULL AUTO_INCREMENT , "
+					+ " `password` CHAR(32)," + " `id` INT(9) NOT NULL AUTO_INCREMENT , "
 					+ "`regestrationdate` INT(10) NULL ," + "`activated` TINYINT(1) NOT NULL ,"
 					+ " PRIMARY KEY (`id`))");
 			preparedStatement.executeUpdate();
@@ -48,6 +48,9 @@ public class MySQLConnection {
 			preparedStatement.executeUpdate();
 			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + databasePrefix
 					+ "grouppermissions` ( `groupid` INT(5) NOT NULL , `permissionid` INT(9) NOT NULL ))");
+			preparedStatement.executeUpdate();
+			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + databasePrefix
+					+ "groupsusers` ( `userid` INT(9) NOT NULL , `groupid` INT(5) NOT NULL )");
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();

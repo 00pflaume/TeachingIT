@@ -1,7 +1,11 @@
 package de.simonbrungs.teachingit.api.groups;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
+import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.user.Account;
 
 public class Group {
@@ -35,7 +39,12 @@ public class Group {
 	}
 
 	public boolean hasPermission(String pPermission) {
-		pPermission = pPermission.toLowerCase();
+		return hasPermission(new Permission(pPermission));
+	}
+
+	public boolean hasPermission(Permission pPermission) {
+		if (pPermission.getPermissionID() == -1)
+			return false;
 		if (permissions.contains(pPermission))
 			return true;
 		if (superGroup == null)
@@ -52,11 +61,40 @@ public class Group {
 	}
 
 	public ArrayList<Account> getUsersInGroup() {
-
+		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		ArrayList<Account> accounts = new ArrayList<>();
+		try {
+			ResultSet resultSet = con.createStatement()
+					.executeQuery("select userid from `" + TeachingIt.getInstance().getConnection().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+							+ "users` WHERE groupid='" + groupID + "' LIMIT 1");
+			while (resultSet.next()) {
+				accounts.add(new Account(resultSet.getInt("userid")));
+			}
+			for (Group group : GroupManager.getGroups()) {
+				if (group.isSuperGroup(this)) {
+					accounts.addAll(group.getUsersInGroup());
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			TeachingIt.getInstance().getConnection().closeConnection(con);
+		}
+		return accounts;
 	}
 
 	public void setPermissionHeight(int pPermissionHeight) {
 
+	}
+
+	public boolean isSuperGroup(Group pSuperGroup) {
+		if (superGroup == null)
+			return false;
+		if (superGroup.equals(pSuperGroup))
+			return true;
+		return superGroup.isSuperGroup(pSuperGroup);
 	}
 
 	public void removePermission(String permission) {
