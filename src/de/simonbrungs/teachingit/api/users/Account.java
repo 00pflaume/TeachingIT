@@ -80,7 +80,7 @@ public class Account {
 	public boolean addMetaInfo(String pMetaIdentifier) {
 		if (getMetaInfo(pMetaIdentifier) != null)
 			return false;
-
+		return true;
 	}
 
 	public void removeMetaInfo(String pMetaIdentifier) {
