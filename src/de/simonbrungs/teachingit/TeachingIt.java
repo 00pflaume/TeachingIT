@@ -16,6 +16,7 @@ import de.simonbrungs.teachingit.api.plugin.theme.Theme;
 import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.commands.ShutDown;
 import de.simonbrungs.teachingit.connection.MySQLConnection;
+import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterd;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
 public class TeachingIt {
@@ -27,7 +28,6 @@ public class TeachingIt {
 	private PluginManager pluginManager = new PluginManager();
 	public final String PREFIX = "[TeachingIt] ";
 	private EventExecuter eventExecuter;
-	private Theme theme;
 	private MySQLConnection con;
 	private GroupManager groupManager;
 	private AccountManager accountManager;
@@ -59,6 +59,7 @@ public class TeachingIt {
 		con = new MySQLConnection(config.getProperty("MySQLUser"), config.getProperty("MySQLPassword"),
 				Integer.parseInt(config.getProperty("MySQLPort")), config.getProperty("MySQLHost"),
 				config.getProperty("MySQLTablePrefix"), config.getProperty("MySQLDatabase"));
+		eventExecuter = new EventExecuter();
 		groupManager = new GroupManager();
 		accountManager = new AccountManager();
 		System.out.println(PREFIX + "Now going to load plugins.");
@@ -69,9 +70,11 @@ public class TeachingIt {
 			System.out.println(PREFIX + "The server is started");
 			webserver = new Webserver(config.getProperty("WebServerPath"),
 					Integer.parseInt(config.getProperty("WebServerPort")));
+
 			console.commandsReader();
 		} else {
 			System.out.println(PREFIX + "The server is now going to hold.");
+			shutDown();
 		}
 	}
 
@@ -93,11 +96,25 @@ public class TeachingIt {
 	}
 
 	private boolean loadTheme() {
-		final File folder = new File("plugins");
+		final File folder = new File("theme");
 		if (!folder.exists()) {
 			folder.mkdirs();
 			System.out.println(PREFIX + "Put a theme which is named theme.jar into the theme folder");
 			return false;
+		}
+		File theme = new File("theme/theme.jar");
+		if (!theme.exists()) {
+			System.out.println(PREFIX + "Put a theme which is named theme.jar into the theme folder");
+			return false;
+		}
+		if (theme.isDirectory()) {
+			System.out.println(PREFIX + "Put a theme which is named theme.jar into the theme folder");
+			return false;
+		}
+		try {
+			pluginManager.registerTheme(theme);
+		} catch (ThemeAlreadyRegisterd e) {
+			e.printStackTrace();
 		}
 		return true;
 	}
@@ -135,10 +152,6 @@ public class TeachingIt {
 
 	public EventExecuter getEventExecuter() {
 		return eventExecuter;
-	}
-
-	public Theme getTheme() {
-		return theme;
 	}
 
 	public String getHomeDirectory() {

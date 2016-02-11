@@ -1,7 +1,9 @@
 package de.simonbrungs.teachingit.api.plugin.theme;
 
-public abstract class ErrorPageContentGenerator {
-	public abstract String getErrorPageNotFound();
+import de.simonbrungs.teachingit.api.events.ContentCreateEvent;
 
-	public abstract String getErrorAccesDenied();
+public abstract class ErrorPageContentGenerator {
+	public abstract ContentCreateEvent getErrorPageNotFound(ContentCreateEvent contentCreateEvent);
+
+	public abstract ContentCreateEvent getErrorAccesDenied(ContentCreateEvent contentCreateEvent);
 }

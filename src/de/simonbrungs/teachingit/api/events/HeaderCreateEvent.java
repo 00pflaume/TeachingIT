@@ -24,4 +24,9 @@ public class HeaderCreateEvent extends Event {
 	public String getHeader() {
 		return header;
 	}
+
+	@Override
+	public void setCanceld(boolean pCanceld) {
+		canceld = pCanceld;
+	}
 }

@@ -19,6 +19,10 @@ public class PluginManager {
 	private String pluginManagerPrefix = "[PluginManager] ";
 	private Theme theme = null;
 
+	public Theme getTheme() {
+		return theme;
+	}
+
 	public void registerTheme(File pThemeJar) throws ThemeAlreadyRegisterd {
 		if (this.theme != null)
 			throw new ThemeAlreadyRegisterd();
