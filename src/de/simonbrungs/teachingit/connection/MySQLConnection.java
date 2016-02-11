@@ -33,7 +33,7 @@ public class MySQLConnection {
 			preparedStatement.executeUpdate();
 			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + databasePrefix
 					+ "users` ( `user` VARCHAR(128) NOT NULL ," + " `email` VARCHAR(254) NOT NULL ,"
-					+ " `password` CHAR(32)," + " `id` INT(9) NOT NULL AUTO_INCREMENT , "
+					+ " `password` CHAR(40)," + " `id` INT(9) NOT NULL AUTO_INCREMENT , "
 					+ "`regestrationdate` INT(10) NULL ," + "`activated` TINYINT(1) NOT NULL ,"
 					+ " PRIMARY KEY (`id`))");
 			preparedStatement.executeUpdate();

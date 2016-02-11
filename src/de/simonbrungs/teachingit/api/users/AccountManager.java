@@ -1,5 +1,7 @@
 package de.simonbrungs.teachingit.api.users;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,7 +19,7 @@ public class AccountManager {
 							+ TeachingIt.getInstance().getConnection().getTablePrefix()
 							+ "users` WHERE user= ? AND password= ? LIMIT 1");
 			prepStmt.setString(1, pUsername);
-			prepStmt.setString(2, pPassword);
+			prepStmt.setString(2, encryptPassword(pPassword));
 			ResultSet resultSet = prepStmt.executeQuery();
 			if (resultSet.next()) {
 				Account account = new Account(resultSet.getInt("id"));
@@ -92,7 +94,7 @@ public class AccountManager {
 					+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` values (?, ?, ?, ?, ?, ?)");
 			preparedStatement.setString(1, pUserName);
 			preparedStatement.setString(2, pEmail);
-			preparedStatement.setNull(3, 3);
+			preparedStatement.setString(3, encryptPassword(pPassword));
 			preparedStatement.setLong(4, System.currentTimeMillis() / 1000L);
 			preparedStatement.setInt(5, 0);
 			preparedStatement.setNull(3, 5);
@@ -113,5 +115,21 @@ public class AccountManager {
 
 	public void removeUser(String pUserName) {
 
+	}
+
+	public String encryptPassword(String pPassword) {
+		MessageDigest mDigest;
+		try {
+			mDigest = MessageDigest.getInstance("SHA1");
+			byte[] result = mDigest.digest(pPassword.getBytes());
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < result.length; i++) {
+				sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
+			}
+			return sb.toString();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

@@ -2,6 +2,7 @@ package de.simonbrungs.teachingit.api.users;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import de.simonbrungs.teachingit.TeachingIt;
@@ -15,39 +16,111 @@ public class Account {
 	}
 
 	public String getUserName() {
-
+		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		try {
+			ResultSet resultSet = con.createStatement()
+					.executeQuery("select user from `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE id='" + id
+							+ "' LIMIT 1");
+			if (resultSet.next()) {
+				return resultSet.getString("user");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			TeachingIt.getInstance().getConnection().closeConnection(con);
+		}
+		return null;
 	}
 
 	public int getID() {
 		return id;
 	}
 
-	public String getMetaInfo(String pMetaIdentifier) {
+	public String getMetaInfo(int pMetaInfoID) {
+		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		try {
+			ResultSet resultSet = con.createStatement()
+					.executeQuery("select email from `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE userid='" + id
+							+ "' LIMIT 1");
+			if (resultSet.next()) {
+				return resultSet.getString("email");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			TeachingIt.getInstance().getConnection().closeConnection(con);
+		}
+		return null;
+	}
 
+	public String getMetaInfo(String pMetaIdentifier) {
+		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		try {
+			ResultSet resultSet = con.createStatement()
+					.executeQuery("select email from `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE userid='" + id
+							+ "' LIMIT 1");
+			if (resultSet.next()) {
+				return resultSet.getString("email");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			TeachingIt.getInstance().getConnection().closeConnection(con);
+		}
+		return null;
 	}
 
 	public void setUserName() {
 
 	}
 
-	public boolean setMetaInfo(String pMetaIdentifier) {
+	public boolean addMetaInfo(String pMetaIdentifier) {
+		if (getMetaInfo(pMetaIdentifier) != null)
+			return false;
 
 	}
 
-	public boolean removeMetaInfo(String pMetaIdentifier) {
+	public void removeMetaInfo(String pMetaIdentifier) {
 
 	}
 
 	public boolean isActivated() {
-
-	}
-
-	public void addGroup() {
-
+		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		try {
+			ResultSet resultSet = con.createStatement()
+					.executeQuery("select activated from `" + TeachingIt.getInstance().getConnection().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE id='"
+							+ id + "' LIMIT 1");
+			if (resultSet.next()) {
+				return resultSet.getByte("activated") == 1;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			TeachingIt.getInstance().getConnection().closeConnection(con);
+		}
+		return false;
 	}
 
 	public Group getGroup() {
-
+		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		try {
+			ResultSet resultSet = con.createStatement()
+					.executeQuery("select groupid from `" + TeachingIt.getInstance().getConnection().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+							+ "groupsusers` WHERE userid='" + id + "' LIMIT 1");
+			if (resultSet.next()) {
+				return new Group(resultSet.getInt("groupid"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			TeachingIt.getInstance().getConnection().closeConnection(con);
+		}
+		return null;
 	}
 
 	public void setEmail(String pEmail) {
@@ -55,11 +128,25 @@ public class Account {
 	}
 
 	public String getEmail() {
-
+		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		try {
+			ResultSet resultSet = con.createStatement()
+					.executeQuery("select email from `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE id='" + id
+							+ "' LIMIT 1");
+			if (resultSet.next()) {
+				return resultSet.getString("email");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			TeachingIt.getInstance().getConnection().closeConnection(con);
+		}
+		return null;
 	}
 
-	public void setPassword() {
-
+	public void setPassword(String pPassword) {
+		pPassword = TeachingIt.getInstance().getAccountManager().encryptPassword(pPassword);
 	}
 
 	public boolean hasPermission(String pPermission) {
@@ -71,7 +158,21 @@ public class Account {
 	}
 
 	public long getRegistrationDate() {
-
+		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		try {
+			ResultSet resultSet = con.createStatement().executeQuery(
+					"select regestrationdate from `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE id='" + id
+							+ "' LIMIT 1");
+			if (resultSet.next()) {
+				return resultSet.getLong("regestrationdate");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			TeachingIt.getInstance().getConnection().closeConnection(con);
+		}
+		return 0;
 	}
 
 	public void setActivated(byte status) {
