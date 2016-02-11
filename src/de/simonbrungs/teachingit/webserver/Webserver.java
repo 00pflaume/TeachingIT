@@ -9,6 +9,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.events.ContentCreateEvent;
@@ -36,28 +38,38 @@ public class Webserver {
 							BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 							OutputStream output = socket.getOutputStream();
 							PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
-						for (String line = reader.readLine(); !line.isEmpty(); line = reader.readLine())
-							;
-						System.out.println("request from " + socket.getRemoteSocketAddress());
-						User user = new User(null, null);
+						/*
+						 * String line = reader.readLine(); String useragent =
+						 * "";
+						 * 
+						 * if (line != null) while (!line.isEmpty()) { line =
+						 * reader.readLine(); if
+						 * (line.startsWith("User-Agent:")) { useragent = line;
+						 * } System.out.println(line); }
+						 */
+						String path = receiveRequest(reader);
+						System.out.println("request from " + socket.getRemoteSocketAddress() + " to path " + path);
+						User user = new User(path, null, socket.getRemoteSocketAddress());
 						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(null);
 						TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
 						if (!websiteCallEvent.isCanceld()) {
-							String header = "<html><head>";
+							String response = "<html><head>";
 							HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent();
 							TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
-							String response = header + headerCreateEvent.getHeader();
+							if (headerCreateEvent.getHeader() != null) {
+								response += headerCreateEvent.getHeader();
+							}
 							response = response + TeachingIt.getInstance().getPluginManager().getTheme().getHeader();
 							ContentCreateEvent contentCreateEvent = new ContentCreateEvent(user);
 							TeachingIt.getInstance().getEventExecuter().executeEvent(contentCreateEvent);
-							if (contentCreateEvent.getTitle() != null) {
+							if (contentCreateEvent.getTitle() == null) {
 								contentCreateEvent.setTitle("Teaching IT");
 							}
 							if (contentCreateEvent.getContent() == null) {
 								contentCreateEvent = TeachingIt.getInstance().getPluginManager().getTheme()
 										.getErrorPageGenerator().getErrorPageNotFound(contentCreateEvent);
 							}
-							response += contentCreateEvent.getTitle() + "</head>"
+							response += "<title>" + contentCreateEvent.getTitle() + "</title>" + "</head>"
 									+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyStart(user)
 									+ contentCreateEvent.getContent()
 									+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyStart(user)
@@ -71,11 +83,25 @@ public class Webserver {
 					} catch (IOException iox) {
 					}
 			}
-		} catch (Exception e) {
+		} catch (
+
+		Exception e)
+
+		{
 			e.printStackTrace();
-			if (shouldStop == false)
-				webserver(pPort);
 		}
+
+	}
+
+	private String receiveRequest(BufferedReader reader) throws IOException {
+		final Pattern getLinePattern = Pattern.compile("(?i)GET\\s+/(.*?)\\s+HTTP/1\\.[01]");
+		String resource = null;
+		for (String line = reader.readLine(); !line.isEmpty(); line = reader.readLine()) {
+			Matcher matcher = getLinePattern.matcher(line);
+			if (matcher.matches())
+				resource = matcher.group(1);
+		}
+		return resource;
 	}
 
 	public void stop() {

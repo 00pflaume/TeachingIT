@@ -1,21 +1,28 @@
 package de.simonbrungs.teachingit.api.users;
 
-import com.sun.net.httpserver.HttpExchange;
+import java.net.SocketAddress;
 
 public class User {
-	private HttpExchange httpExchange;
 	private Account account;
+	private String path;
+	private SocketAddress socketAddress;
 
-	public User(HttpExchange pHttpExchange, Account pAccount) {
-		httpExchange = pHttpExchange;
+	public User(String pPath, Account pAccount, SocketAddress pSocketAddress) {
+		path = pPath;
 		account = pAccount;
+		socketAddress = pSocketAddress;
 	}
 
-	public HttpExchange getHttpExchange() {
-		return httpExchange;
+	public SocketAddress getSocketAddress() {
+		return socketAddress;
+	}
+
+	public String getCalledPath() {
+		return path;
 	}
 
 	public Account getAccount() {
 		return account;
 	}
+
 }

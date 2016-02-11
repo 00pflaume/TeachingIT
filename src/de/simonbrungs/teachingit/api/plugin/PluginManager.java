@@ -23,16 +23,16 @@ public class PluginManager {
 		return theme;
 	}
 
-	public void registerTheme(File pThemeJar) throws ThemeAlreadyRegisterd {
+	public boolean registerTheme(File pThemeJar) throws ThemeAlreadyRegisterd {
 		if (this.theme != null)
 			throw new ThemeAlreadyRegisterd();
 		Properties propertieFile = getPropertieFile(pThemeJar);
 		if (propertieFile == null)
-			return;
+			return false;
 		if (!checkPropertieFile(propertieFile)) {
 			System.out.println(pluginManagerPrefix + "The Theme propertie file of " + pThemeJar.getName()
 					+ " is not correct. Needed information are missing");
-			return;
+			return false;
 		}
 		try {
 			Theme theme = null;
@@ -42,7 +42,7 @@ public class PluginManager {
 						+ propertieFile.getProperty("version") + ") from " + propertieFile.getProperty("author")
 						+ " was successfully loaded.");
 				this.theme = theme;
-
+				return true;
 			} else {
 				System.out.println(pluginManagerPrefix
 						+ "The plugin could not be loaded. The given main class of the plugin does not "
@@ -60,6 +60,7 @@ public class PluginManager {
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}
+		return false;
 	}
 
 	private Object loadPlugin(File pPluginJar, Properties propertieFile, Class<?> pSearchedSuperClass)

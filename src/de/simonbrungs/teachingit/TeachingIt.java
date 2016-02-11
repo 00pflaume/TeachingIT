@@ -12,7 +12,6 @@ import de.simonbrungs.teachingit.api.Console;
 import de.simonbrungs.teachingit.api.events.EventExecuter;
 import de.simonbrungs.teachingit.api.groups.GroupManager;
 import de.simonbrungs.teachingit.api.plugin.PluginManager;
-import de.simonbrungs.teachingit.api.plugin.theme.Theme;
 import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.commands.ShutDown;
 import de.simonbrungs.teachingit.connection.MySQLConnection;
@@ -112,7 +111,10 @@ public class TeachingIt {
 			return false;
 		}
 		try {
-			pluginManager.registerTheme(theme);
+			if (!pluginManager.registerTheme(theme)) {
+				System.out.println(PREFIX + "An error happend while loading the theme");
+				return false;
+			}
 		} catch (ThemeAlreadyRegisterd e) {
 			e.printStackTrace();
 		}
@@ -125,8 +127,9 @@ public class TeachingIt {
 
 	public void shutDown() {
 		shouldClose = true;
-		if (webserver != null)
+		if (webserver != null) {
 			webserver.stop();
+		}
 		System.out.println(PREFIX + "The server is now going to hold. Goodbye");
 	}
 
