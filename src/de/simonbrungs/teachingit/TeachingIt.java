@@ -10,11 +10,12 @@ import java.util.Properties;
 
 import de.simonbrungs.teachingit.api.Console;
 import de.simonbrungs.teachingit.api.events.EventExecuter;
+import de.simonbrungs.teachingit.api.groups.GroupManager;
 import de.simonbrungs.teachingit.api.plugin.PluginManager;
 import de.simonbrungs.teachingit.api.plugin.theme.Theme;
+import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.commands.ShutDown;
 import de.simonbrungs.teachingit.connection.MySQLConnection;
-import de.simonbrungs.teachingit.utilities.ContentDownloader;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
 public class TeachingIt {
@@ -27,8 +28,9 @@ public class TeachingIt {
 	public final String PREFIX = "[TeachingIt] ";
 	private EventExecuter eventExecuter;
 	private Theme theme;
-	public final String CONTENTDOWNLOADURL = "http://simonsator.de/teachingit/";
 	private MySQLConnection con;
+	private GroupManager groupManager;
+	private AccountManager accountManager;
 
 	public static void main(String[] args) {
 		new TeachingIt();
@@ -36,6 +38,14 @@ public class TeachingIt {
 
 	public String getIncludeContentURL() {
 		return getHomeDirectory() + "include/";
+	}
+
+	public GroupManager getGroupManager() {
+		return groupManager;
+	}
+
+	public AccountManager getAccountManager() {
+		return accountManager;
 	}
 
 	public TeachingIt() {
@@ -46,6 +56,11 @@ public class TeachingIt {
 		}
 		config = getConfig();
 		registerCommands();
+		con = new MySQLConnection(config.getProperty("MySQLUser"), config.getProperty("MySQLPassword"),
+				Integer.parseInt(config.getProperty("MySQLPort")), config.getProperty("MySQLHost"),
+				config.getProperty("MySQLTablePrefix"), config.getProperty("MySQLDatabase"));
+		groupManager = new GroupManager();
+		accountManager = new AccountManager();
 		System.out.println(PREFIX + "Now going to load plugins.");
 		loadPlugins();
 		System.out.println(PREFIX + "Plugins loaded.");
@@ -81,8 +96,8 @@ public class TeachingIt {
 		final File folder = new File("plugins");
 		if (!folder.exists()) {
 			folder.mkdirs();
-			ContentDownloader contentDownloader = new ContentDownloader(CONTENTDOWNLOADURL + "theme/standarttheme.jar",
-					"");
+			System.out.println(PREFIX + "Put a theme which is named theme.jar into the theme folder");
+			return false;
 		}
 		return true;
 	}
@@ -141,7 +156,7 @@ public class TeachingIt {
 				prop.setProperty("MySQLUser", "root");
 				prop.setProperty("MySQLPassword", "password");
 				prop.setProperty("MySQLDatabase", "TeachingIt");
-				prop.setProperty("MySQLTablePrefixes", "TIt_");
+				prop.setProperty("MySQLTablePrefix", "TIt_");
 				prop.store(output, null);
 				return true;
 			}

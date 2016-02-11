@@ -1,4 +1,4 @@
-package de.simonbrungs.teachingit.api.user;
+package de.simonbrungs.teachingit.api.users;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,13 +12,16 @@ public class AccountManager {
 	public Account loginUser(String pUsername, String pPassword) {
 		Connection con = TeachingIt.getInstance().getConnection().createConnection();
 		try {
-			ResultSet resultSet = con.createStatement()
-					.executeQuery("select id, activated from " + TeachingIt.getInstance().getConnection().getDatabase()
-							+ ".`" + TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE user='"
-							+ pUsername + "' AND password='" + pPassword + "' LIMIT 1");
+			PreparedStatement prepStmt = con.prepareStatement(
+					"select id, activated from " + TeachingIt.getInstance().getConnection().getDatabase() + ".`"
+							+ TeachingIt.getInstance().getConnection().getTablePrefix()
+							+ "users` WHERE user= ? AND password= ? LIMIT 1");
+			prepStmt.setString(1, pUsername);
+			prepStmt.setString(2, pPassword);
+			ResultSet resultSet = prepStmt.executeQuery();
 			if (resultSet.next()) {
 				Account account = new Account(resultSet.getInt("id"));
-				if (resultSet.getByte("activated") == 1 && !account.isBanned()) {
+				if (resultSet.getByte("activated") == 1) {
 					return account;
 				} else {
 					return null;
@@ -37,10 +40,11 @@ public class AccountManager {
 	public Account getUser(String pUsername) {
 		Connection con = TeachingIt.getInstance().getConnection().createConnection();
 		try {
-			ResultSet resultSet = con.createStatement()
-					.executeQuery("select id from " + TeachingIt.getInstance().getConnection().getDatabase() + ".`"
-							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE user='"
-							+ pUsername + "' LIMIT 1");
+			PreparedStatement prepStmt = con.prepareStatement("select id, activated from "
+					+ TeachingIt.getInstance().getConnection().getDatabase() + ".`"
+					+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE user= ? LIMIT 1");
+			prepStmt.setString(1, pUsername);
+			ResultSet resultSet = prepStmt.executeQuery();
 			if (resultSet.next()) {
 				return new Account(resultSet.getInt("id"));
 			} else {
@@ -80,9 +84,8 @@ public class AccountManager {
 		Connection con = TeachingIt.getInstance().getConnection().createConnection();
 		CreateAccountEvent createAccountEvent = new CreateAccountEvent(pUserName, pEmail, pActive);
 		TeachingIt.getInstance().getEventExecuter().executeEvent(createAccountEvent);
-		if (createAccountEvent.isCanceld()) {
+		if (createAccountEvent.isCanceld())
 			return null;
-		}
 		try {
 			PreparedStatement preparedStatement = con.prepareStatement("insert into  `"
 					+ TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
