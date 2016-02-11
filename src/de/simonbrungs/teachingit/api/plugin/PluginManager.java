@@ -51,15 +51,19 @@ public class PluginManager {
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
 			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
 			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 		}
 	}
 
 	private Object loadPlugin(File pPluginJar, Properties propertieFile, Class<?> pSearchedSuperClass)
-			throws InstantiationException, IllegalAccessException, ClassNotFoundException, MalformedURLException {
+			throws InstantiationException, MalformedURLException, ClassNotFoundException, IllegalAccessException {
 		URLClassLoader loader = null;
 		try {
 			loader = new URLClassLoader(new URL[] { pPluginJar.toURI().toURL() });
-			Class<?> cl = Class.forName(propertieFile.getProperty("main"));
+			Class<?> cl = loader.loadClass(propertieFile.getProperty("main"));
 			if (pSearchedSuperClass.isAssignableFrom(cl)) {
 				return cl.newInstance();
 			}
@@ -106,6 +110,10 @@ public class PluginManager {
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
 			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
 			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -118,7 +126,7 @@ public class PluginManager {
 		Properties prop = new Properties();
 		try {
 			zipFile = new ZipFile(pPluginJar.getAbsolutePath());
-			ZipEntry propertieFileEntry = zipFile.getEntry("properties.properties");
+			ZipEntry propertieFileEntry = zipFile.getEntry("properties/plugin.properties");
 			if (propertieFileEntry == null) {
 				System.out.println(pluginManagerPrefix + "Propertie file missing in " + pPluginJar.getName() + ".");
 				return null;

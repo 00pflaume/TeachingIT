@@ -54,7 +54,7 @@ public class TeachingIt {
 			System.out.println(PREFIX + "The Config was created. Please input your data into the config file.");
 			return;
 		}
-		config = getConfig();
+		config = initConfig();
 		registerCommands();
 		con = new MySQLConnection(config.getProperty("MySQLUser"), config.getProperty("MySQLPassword"),
 				Integer.parseInt(config.getProperty("MySQLPort")), config.getProperty("MySQLHost"),
@@ -126,7 +126,11 @@ public class TeachingIt {
 	}
 
 	private void registerCommands() {
-		getConsole().registerCommand(new ShutDown(), "stop");
+		ShutDown shutdownCommand = new ShutDown();
+		getConsole().registerCommand(shutdownCommand, "stop");
+		getConsole().registerCommand(shutdownCommand, "end");
+		getConsole().registerCommand(shutdownCommand, "hold");
+		getConsole().registerCommand(shutdownCommand, "shutdown");
 	}
 
 	public EventExecuter getEventExecuter() {
@@ -157,6 +161,7 @@ public class TeachingIt {
 				prop.setProperty("MySQLPassword", "password");
 				prop.setProperty("MySQLDatabase", "TeachingIt");
 				prop.setProperty("MySQLTablePrefix", "TIt_");
+				prop.setProperty("MySQLUseSSL", "true");
 				prop.store(output, null);
 				return true;
 			}
@@ -175,7 +180,11 @@ public class TeachingIt {
 		}
 	}
 
-	private Properties getConfig() {
+	public Properties getConfig() {
+		return config;
+	}
+
+	private Properties initConfig() {
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {

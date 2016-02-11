@@ -12,17 +12,17 @@ public class MySQLConnection {
 	private String password;
 	private int port;
 	private String database;
-	private String databasePrefix;
+	private String tablePrefix;
 	private String host;
 
-	public MySQLConnection(String pUser, String pPassword, int pPort, String pHost, String pDatabasePrefix,
+	public MySQLConnection(String pUser, String pPassword, int pPort, String pHost, String ptablePrefix,
 			String pDatabase) {
 		user = pUser;
 		password = pPassword;
 		port = pPort;
 		host = pHost;
 		database = pDatabase;
-		databasePrefix = pDatabasePrefix;
+		tablePrefix = ptablePrefix;
 		importDatabase();
 	}
 
@@ -31,25 +31,25 @@ public class MySQLConnection {
 		try {
 			PreparedStatement preparedStatement = con.prepareStatement("CREATE DATABASE IF NOT EXISTS " + database);
 			preparedStatement.executeUpdate();
-			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + databasePrefix
+			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
 					+ "users` ( `user` VARCHAR(128) NOT NULL ," + " `email` VARCHAR(254) NOT NULL ,"
 					+ " `password` CHAR(40)," + " `id` INT(9) NOT NULL AUTO_INCREMENT , "
 					+ "`regestrationdate` INT(10) NULL ," + "`activated` TINYINT(1) NOT NULL ,"
 					+ " PRIMARY KEY (`id`))");
 			preparedStatement.executeUpdate();
-			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + databasePrefix
+			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
 					+ "groups` ( `groupname` VARCHAR(128) NOT NULL ," + " `id` INT(5) AUTO_INCREMENT ,"
 					+ " `supergroup` INT(5) NOT NULL ," + " `permissionheight` INT(9) NOT NULL ,"
 					+ " PRIMARY KEY (`id`))");
 			preparedStatement.executeUpdate();
-			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + databasePrefix
+			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
 					+ "permissions` ( `id` INT(9) NOT NULL AUTO_INCREMENT ," + " `permission` VARCHAR(512) NOT NULL ,"
 					+ " PRIMARY KEY (`id`))");
 			preparedStatement.executeUpdate();
-			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + databasePrefix
-					+ "grouppermissions` ( `groupid` INT(5) NOT NULL , `permissionid` INT(9) NOT NULL ))");
+			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
+					+ "grouppermissions` ( `groupid` INT(5) NOT NULL , `permissionid` INT(9) NOT NULL )");
 			preparedStatement.executeUpdate();
-			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + databasePrefix
+			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
 					+ "groupsusers` ( `userid` INT(9) NOT NULL , `groupid` INT(5) NOT NULL )");
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
@@ -63,15 +63,19 @@ public class MySQLConnection {
 	}
 
 	public String getTablePrefix() {
-		return databasePrefix;
+		return tablePrefix;
 	}
 
 	public Connection createConnection() {
 		Connection con;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			con = DriverManager
-					.getConnection("jdbc:mysql://" + host + ":" + port + "/?user=" + user + "&password=" + password);
+			String add = "";
+			if (TeachingIt.getInstance().getConfig().getProperty("MySQLUseSSL").equalsIgnoreCase("false")) {
+				add = "&useSSL=false";
+			}
+			con = DriverManager.getConnection(
+					"jdbc:mysql://" + host + ":" + port + "/?user=" + user + "&password=" + password + add);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;

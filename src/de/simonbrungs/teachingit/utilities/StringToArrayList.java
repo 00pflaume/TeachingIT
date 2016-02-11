@@ -28,7 +28,7 @@ public class StringToArrayList {
 	 * @return Return the created ArrayList
 	 */
 	public static ArrayList<String> stringToArrayList(String string) {
-		StringTokenizer st = new StringTokenizer(string, "|");
+		StringTokenizer st = new StringTokenizer(string, " ");
 		int stLength = st.countTokens();
 		ArrayList<String> stringArray = new ArrayList<>();
 		for (int i = 0; i < stLength; i++) {

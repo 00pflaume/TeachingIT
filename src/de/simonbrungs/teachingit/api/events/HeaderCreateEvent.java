@@ -4,8 +4,7 @@ public class HeaderCreateEvent extends Event {
 	private boolean canceld = false;
 	private String header = "";
 
-	public HeaderCreateEvent(String pResponse) {
-		header = pResponse;
+	public HeaderCreateEvent() {
 	}
 
 	@Override
