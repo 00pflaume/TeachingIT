@@ -50,7 +50,11 @@ public class MySQLConnection {
 					+ "grouppermissions` ( `groupid` INT(4) NOT NULL , `permissionid` INT(9) NOT NULL )");
 			preparedStatement.executeUpdate();
 			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
-					+ "groupsusers` ( `userid` INT(9) NOT NULL , `groupid` INT(5) NOT NULL )");
+					+ "groupsusers` ( `userid` INT(6) NOT NULL , `groupid` INT(5) NOT NULL )");
+			preparedStatement.executeUpdate();
+			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
+					+ "usermeta` ( `metakey` VARCHAR(128) NOT NULL ," + " `id` INT(9) NOT NULL ,"
+					+ " `userid` INT NOT NULL ," + " `metavalue` INT NOT NULL )");
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();

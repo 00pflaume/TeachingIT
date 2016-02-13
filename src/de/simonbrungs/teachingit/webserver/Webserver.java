@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -106,9 +105,6 @@ public class Webserver {
 						}
 					} catch (IOException iox) {
 					}
-			} catch (BindException e) {
-				e.printStackTrace();
-				TeachingIt.getInstance().shutDown(1);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

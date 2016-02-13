@@ -13,7 +13,7 @@ public abstract class Plugin {
 		pluginProperties = pProperties;
 	}
 
-	public abstract void onEnable();
+	public abstract void onEnable() throws Throwable;
 
-	public abstract void onDisable();
+	public abstract void onDisable() throws Throwable;
 }

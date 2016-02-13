@@ -3,6 +3,7 @@ package de.simonbrungs.teachingit.api.plugin;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -46,7 +47,7 @@ public class PluginManager {
 			} else {
 				System.out.println(pluginManagerPrefix
 						+ "The plugin could not be loaded. The given main class of the plugin does not "
-						+ " extends the class \"Theme\".");
+						+ " extend the class \"Theme\".");
 			}
 		} catch (ClassNotFoundException e) {
 			System.out.println(pluginManagerPrefix + "The given plugin \"" + propertieFile.getProperty("main")
@@ -70,9 +71,22 @@ public class PluginManager {
 			loader = new URLClassLoader(new URL[] { pPluginJar.toURI().toURL() });
 			Class<?> cl = loader.loadClass(propertieFile.getProperty("main"));
 			if (pSearchedSuperClass.isAssignableFrom(cl)) {
-				return cl.newInstance();
+				Plugin clazz = (Plugin) cl.getDeclaredConstructor().newInstance();
+				try {
+					try {
+						clazz.onEnable();
+					} catch (Throwable e) {
+						e.printStackTrace();
+					}
+				} catch (Throwable e) {
+					e.printStackTrace();
+					return null;
+				}
+				return clazz;
 			}
 			return null;
+		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e1) {
+			e1.printStackTrace();
 		} finally {
 			try {
 				if (loader != null) {
@@ -83,6 +97,7 @@ public class PluginManager {
 				e.printStackTrace();
 			}
 		}
+		return null;
 	}
 
 	public void registerPlugin(File pPluginJar) {
@@ -98,15 +113,12 @@ public class PluginManager {
 			Plugin pluginInstance = null;
 			pluginInstance = (Plugin) loadPlugin(pPluginJar, propertieFile, Plugin.class);
 			if (pluginInstance != null) {
-				pluginInstance.onEnable();
 				System.out.println(pluginManagerPrefix + "The plugin " + propertieFile.getProperty("name")
 						+ " (version " + propertieFile.getProperty("version") + ") from "
 						+ propertieFile.getProperty("author") + " was successfully enabled.");
 				plugins.add(pluginInstance);
 			} else {
-				System.out.println(pluginManagerPrefix
-						+ "The plugin could not be loaded. The given main class of the plugin does not "
-						+ " implement the interface \"Plugin\".");
+				System.out.println(pluginManagerPrefix + "Error while loading Plugin.");
 			}
 		} catch (ClassNotFoundException e) {
 			System.out.println(pluginManagerPrefix + "The given plugin \"" + propertieFile.getProperty("main")
@@ -159,13 +171,19 @@ public class PluginManager {
 	}
 
 	public void unregisterPlugin(Plugin pPlugin) {
-		if (plugins.contains(pPlugin))
-			pPlugin.onDisable();
+		if (plugins.contains(pPlugin)) {
+			try {
+				pPlugin.onDisable();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+			plugins.remove(pPlugin);
+		}
 	}
 
 	public void unregisterAllPlugins() {
-		for (Plugin plugin : plugins)
-			unregisterPlugin(plugin);
+		while (!plugins.isEmpty())
+			unregisterPlugin(plugins.get(0));
 	}
 
 }

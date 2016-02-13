@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import de.simonbrungs.teachingit.TeachingIt;
+import de.simonbrungs.teachingit.api.events.AccountDeleteEvent;
 import de.simonbrungs.teachingit.api.events.AfterAccountCreationEvent;
 import de.simonbrungs.teachingit.api.events.PreAccountCreationEvent;
 
@@ -119,9 +120,13 @@ public class AccountManager {
 		removeAccount(getAccount(pID));
 	}
 
-	public void removeAccount(Account pAccount) throws IllegalArgumentException {
+	public boolean removeAccount(Account pAccount) {
 		if (pAccount == null)
-			throw new IllegalArgumentException();
+			return false;
+		AccountDeleteEvent accountDeleteEvent = new AccountDeleteEvent(pAccount);
+		TeachingIt.getInstance().getEventExecuter().executeEvent(accountDeleteEvent);
+		if (!accountDeleteEvent.getShouldBeDeleted())
+			return false;
 		Connection con = TeachingIt.getInstance().getConnection().createConnection();
 		try {
 			PreparedStatement preparedStatement = con
@@ -131,11 +136,13 @@ public class AccountManager {
 			preparedStatement.executeUpdate();
 			preparedStatement = con
 					.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE id = '"
-							+ pAccount.getID() + "' LIMIT 1");
+							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "usermeta` WHERE userid = '"
+							+ pAccount.getID() + "'");
 			preparedStatement.executeUpdate();
+			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return false;
 		} finally {
 			TeachingIt.getInstance().getConnection().closeConnection(con);
 		}

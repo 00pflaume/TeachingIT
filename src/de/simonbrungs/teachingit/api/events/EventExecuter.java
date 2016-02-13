@@ -36,7 +36,7 @@ public class EventExecuter {
 
 	public void executeEvent(Event pEvent) {
 		for (ListenerEntry listenerEntry : registerdEvents) {
-			if (pEvent.getClass() == listenerEntry.getToExecuteEventType()) {
+			if (pEvent.getClass().isAssignableFrom(listenerEntry.getToExecuteEventType())) {
 				try {
 					listenerEntry.getExecutiveListener().executeEvent(pEvent);
 				} catch (Exception e) {
