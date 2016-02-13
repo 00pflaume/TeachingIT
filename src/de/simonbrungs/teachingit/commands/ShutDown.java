@@ -9,7 +9,7 @@ public class ShutDown implements Command {
 
 	@Override
 	public void executeCommand(String command, ArrayList<String> args) {
-		TeachingIt.getInstance().shutDown();
+		TeachingIt.getInstance().shutDown(0);
 	}
 
 }

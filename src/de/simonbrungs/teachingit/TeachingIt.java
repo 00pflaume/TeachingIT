@@ -69,12 +69,27 @@ public class TeachingIt {
 			System.out.println(PREFIX + "The server is started");
 			webserver = new Webserver(config.getProperty("WebServerPath"),
 					Integer.parseInt(config.getProperty("WebServerPort")));
-
+			registerIncludes();
 			console.commandsReader();
 		} else {
 			System.out.println(PREFIX + "The server is now going to hold.");
-			shutDown();
+			shutDown(0);
 		}
+	}
+
+	private void registerIncludes() {
+		File folder = new File("include");
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
+		for (final File fileEntry : folder.listFiles()) {
+			System.out.println(fileEntry.getName());
+			getWebserver().registerFile(fileEntry, fileEntry.getName());
+		}
+	}
+
+	public Webserver getWebserver() {
+		return webserver;
 	}
 
 	public MySQLConnection getConnection() {
@@ -125,12 +140,14 @@ public class TeachingIt {
 		return pluginManager;
 	}
 
-	public void shutDown() {
+	public void shutDown(int pExitState) {
 		shouldClose = true;
 		if (webserver != null) {
 			webserver.stop();
 		}
 		System.out.println(PREFIX + "The server is now going to hold. Goodbye");
+		getPluginManager().unregisterAllPlugins();
+		Runtime.getRuntime().exit(pExitState);
 	}
 
 	public boolean getShouldClose() {

@@ -1,14 +1,20 @@
 package de.simonbrungs.teachingit.webserver;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,16 +26,19 @@ import de.simonbrungs.teachingit.api.users.User;
 
 public class Webserver {
 	private boolean shouldStop = false;
+	private Thread webserverThread;
+	private HashMap<String, File> registerdFiles = new HashMap<>();
 
 	public Webserver(String pAdress, int pPort) {
-		new Thread(new Runnable() {
+		webserverThread = new Thread(new Runnable() {
 			public void run() {
-				webserver(pPort);
+				starWebserver(pPort);
 			}
-		}).start();
+		});
+		webserverThread.start();
 	}
 
-	public void webserver(int pPort) {
+	public void starWebserver(int pPort) {
 		try {
 			try (ServerSocket serverSocket = new ServerSocket(pPort)) {
 				while (!shouldStop)
@@ -53,41 +62,55 @@ public class Webserver {
 						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(null);
 						TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
 						if (!websiteCallEvent.isCanceld()) {
-							String response = "<html><head>";
-							HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent();
-							TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
-							if (headerCreateEvent.getHeader() != null) {
-								response += headerCreateEvent.getHeader();
+							File file = registerdFiles.get(path);
+							if (file != null) {
+								List<String> lines = Files.readAllLines(Paths.get(path));
+								writer.println("HTTP/1.0 200 OK");
+								writer.println("Content-Type: text/html; charset=ISO-8859-1");
+								writer.println("Server: NanoHTTPServer");
+								writer.println();
+								String response = lines.get(0);
+								lines.remove(0);
+								for (String line : lines)
+									response += "\n" + line;
+								writer.println(response);
+							} else {
+								String response = "<html><head>";
+								HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent();
+								TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
+								if (headerCreateEvent.getHeader() != null) {
+									response += headerCreateEvent.getHeader();
+								}
+								response = response
+										+ TeachingIt.getInstance().getPluginManager().getTheme().getHeader();
+								ContentCreateEvent contentCreateEvent = new ContentCreateEvent(user);
+								TeachingIt.getInstance().getEventExecuter().executeEvent(contentCreateEvent);
+								if (contentCreateEvent.getTitle() == null) {
+									contentCreateEvent.setTitle("Teaching IT");
+								}
+								if (contentCreateEvent.getContent() == null) {
+									contentCreateEvent = TeachingIt.getInstance().getPluginManager().getTheme()
+											.getErrorPageGenerator().getErrorPageNotFound(contentCreateEvent);
+								}
+								response += "<title>" + contentCreateEvent.getTitle() + "</title>" + "</head>"
+										+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyStart(user)
+										+ contentCreateEvent.getContent()
+										+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyEnd(user)
+										+ "</body></html>";
+								writer.println("HTTP/1.0 200 OK");
+								writer.println("Content-Type: text/html; charset=ISO-8859-1");
+								writer.println("Server: NanoHTTPServer");
+								writer.println();
+								writer.println(response);
 							}
-							response = response + TeachingIt.getInstance().getPluginManager().getTheme().getHeader();
-							ContentCreateEvent contentCreateEvent = new ContentCreateEvent(user);
-							TeachingIt.getInstance().getEventExecuter().executeEvent(contentCreateEvent);
-							if (contentCreateEvent.getTitle() == null) {
-								contentCreateEvent.setTitle("Teaching IT");
-							}
-							if (contentCreateEvent.getContent() == null) {
-								contentCreateEvent = TeachingIt.getInstance().getPluginManager().getTheme()
-										.getErrorPageGenerator().getErrorPageNotFound(contentCreateEvent);
-							}
-							response += "<title>" + contentCreateEvent.getTitle() + "</title>" + "</head>"
-									+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyStart(user)
-									+ contentCreateEvent.getContent()
-									+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyStart(user)
-									+ "</body></html>";
-							writer.println("HTTP/1.0 200 OK");
-							writer.println("Content-Type: text/html; charset=ISO-8859-1");
-							writer.println("Server: NanoHTTPServer");
-							writer.println();
-							writer.println(response);
 						}
 					} catch (IOException iox) {
 					}
+			} catch (BindException e) {
+				e.printStackTrace();
+				TeachingIt.getInstance().shutDown(1);
 			}
-		} catch (
-
-		Exception e)
-
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -104,7 +127,21 @@ public class Webserver {
 		return resource;
 	}
 
+	public void registerFile(File pFile, String pURL) {
+		registerdFiles.put(pURL, pFile);
+	}
+
+	public boolean isURLRegisterd(String pURL) {
+		return registerdFiles.containsKey(pURL);
+	}
+
+	public boolean unregisterFile(String pURL) {
+		return registerdFiles.remove(pURL) != null;
+	}
+
+	@SuppressWarnings("deprecation")
 	public void stop() {
 		shouldStop = true;
+		webserverThread.stop();
 	}
 }

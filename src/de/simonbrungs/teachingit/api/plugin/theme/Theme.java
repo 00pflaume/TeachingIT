@@ -9,7 +9,8 @@ public abstract class Theme extends Plugin {
 
 	public abstract String getBodyStart(User user);
 
-	public abstract String getBodyEnd();
+	public abstract String getBodyEnd(User user);
 
 	public abstract ErrorPageContentGenerator getErrorPageGenerator();
+
 }

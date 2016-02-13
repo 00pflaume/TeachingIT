@@ -8,7 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import de.simonbrungs.teachingit.TeachingIt;
-import de.simonbrungs.teachingit.api.events.CreateAccountEvent;
+import de.simonbrungs.teachingit.api.events.AfterAccountCreationEvent;
+import de.simonbrungs.teachingit.api.events.PreAccountCreationEvent;
 
 public class AccountManager {
 	public Account loginUser(String pUsername, String pPassword) {
@@ -39,7 +40,7 @@ public class AccountManager {
 		}
 	}
 
-	public Account getUser(String pUsername) {
+	public Account getAccount(String pUsername) {
 		Connection con = TeachingIt.getInstance().getConnection().createConnection();
 		try {
 			PreparedStatement prepStmt = con.prepareStatement("select id, activated from "
@@ -60,7 +61,7 @@ public class AccountManager {
 		}
 	}
 
-	public Account getUser(int pUserID) {
+	public Account getAccount(int pUserID) {
 		Connection con = TeachingIt.getInstance().getConnection().createConnection();
 		try {
 			ResultSet resultSet = con.createStatement()
@@ -81,12 +82,12 @@ public class AccountManager {
 	}
 
 	public Account createAccount(String pUserName, String pEmail, String pPassword, boolean pActive) {
-		if (getUser(pUserName) != null)
+		if (getAccount(pUserName) != null)
 			return null;
 		Connection con = TeachingIt.getInstance().getConnection().createConnection();
-		CreateAccountEvent createAccountEvent = new CreateAccountEvent(pUserName, pEmail, pActive);
-		TeachingIt.getInstance().getEventExecuter().executeEvent(createAccountEvent);
-		if (createAccountEvent.isCanceld())
+		PreAccountCreationEvent preAccountCreationEvent = new PreAccountCreationEvent(pUserName, pEmail, pActive);
+		TeachingIt.getInstance().getEventExecuter().executeEvent(preAccountCreationEvent);
+		if (preAccountCreationEvent.isCanceld())
 			return null;
 		try {
 			PreparedStatement preparedStatement = con.prepareStatement("insert into  `"
@@ -98,9 +99,14 @@ public class AccountManager {
 			preparedStatement.setLong(4, System.currentTimeMillis() / 1000L);
 			preparedStatement.setInt(5, 0);
 			preparedStatement.setNull(3, 5);
-			preparedStatement.setInt(6, 1);
+			byte activated = 0;
+			if (preAccountCreationEvent.isActivated())
+				activated = 1;
+			preparedStatement.setByte(6, activated);
 			preparedStatement.executeUpdate();
-			return getUser(pUserName);
+			Account account = getAccount(pUserName);
+			TeachingIt.getInstance().getEventExecuter().executeEvent(new AfterAccountCreationEvent(account));
+			return account;
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return null;
@@ -109,12 +115,34 @@ public class AccountManager {
 		}
 	}
 
-	public void removeUser(int pID) {
-
+	public void removeAccount(int pID) {
+		removeAccount(getAccount(pID));
 	}
 
-	public void removeUser(String pUserName) {
+	public void removeAccount(Account pAccount) throws IllegalArgumentException {
+		if (pAccount == null)
+			throw new IllegalArgumentException();
+		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		try {
+			PreparedStatement preparedStatement = con
+					.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE id = '"
+							+ pAccount.getID() + "' LIMIT 1");
+			preparedStatement.executeUpdate();
+			preparedStatement = con
+					.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` WHERE id = '"
+							+ pAccount.getID() + "' LIMIT 1");
+			preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			TeachingIt.getInstance().getConnection().closeConnection(con);
+		}
+	}
 
+	public void removeAccount(String pUserName) {
+		removeAccount(getAccount(pUserName));
 	}
 
 	public String encryptPassword(String pPassword) {

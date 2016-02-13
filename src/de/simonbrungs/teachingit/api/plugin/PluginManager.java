@@ -158,4 +158,14 @@ public class PluginManager {
 				&& pProperties.getProperty("version") != null && pProperties.getProperty("name") != null;
 	}
 
+	public void unregisterPlugin(Plugin pPlugin) {
+		if (plugins.contains(pPlugin))
+			pPlugin.onDisable();
+	}
+
+	public void unregisterAllPlugins() {
+		for (Plugin plugin : plugins)
+			unregisterPlugin(plugin);
+	}
+
 }

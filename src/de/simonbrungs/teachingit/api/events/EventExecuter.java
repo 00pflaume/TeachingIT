@@ -36,8 +36,12 @@ public class EventExecuter {
 
 	public void executeEvent(Event pEvent) {
 		for (ListenerEntry listenerEntry : registerdEvents) {
-			if (pEvent.getClass().equals(listenerEntry.getToExecuteEventType())) {
-				listenerEntry.getExecutiveListener().executeEvent(pEvent);
+			if (pEvent.getClass() == listenerEntry.getToExecuteEventType()) {
+				try {
+					listenerEntry.getExecutiveListener().executeEvent(pEvent);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				if (pEvent.isCanceld()) {
 					return;
 				}
@@ -47,22 +51,25 @@ public class EventExecuter {
 
 	private class ListenerEntry {
 		private int priority;
-		private Listener<Event> listener;
-		private Class<Event> eventClass;
+		private Listener<?> listener;
+		private Class<?> eventClass;
 
 		public ListenerEntry(Listener<?> pListener, Class<?> pEvent, int pPriority) {
 			priority = pPriority;
+			listener = pListener;
+			eventClass = pEvent;
 		}
 
 		public int getPriority() {
 			return priority;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Listener<Event> getExecutiveListener() {
-			return listener;
+			return (Listener<Event>) listener;
 		}
 
-		public Class<Event> getToExecuteEventType() {
+		public Class<?> getToExecuteEventType() {
 			return eventClass;
 		}
 	}

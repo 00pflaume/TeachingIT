@@ -212,10 +212,11 @@ public class Group {
 								+ "grouppermissions` WHERE groupid = '" + groupID + "' AND permissionid = '"
 								+ pPermission.getPermissionID() + "' LIMIT 1");
 				preparedStatement.execute();
-				for (Group group : TeachingIt.getInstance().getGroupManager().getGroups()) {
-					if (group.hasPermission(pPermission))
-						return;
-				}
+				ResultSet resultSet = con.createStatement().executeQuery("select permissionid from `"
+						+ TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
+						+ TeachingIt.getInstance().getConnection().getTablePrefix() + "grouppermissions` LIMIT 1");
+				if (resultSet.next())
+					return;
 				preparedStatement = con
 						.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnection().getDatabase()
 								+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()

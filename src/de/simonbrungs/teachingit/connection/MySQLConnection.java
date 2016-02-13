@@ -33,7 +33,7 @@ public class MySQLConnection {
 			preparedStatement.executeUpdate();
 			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
 					+ "users` ( `user` VARCHAR(128) NOT NULL ," + " `email` VARCHAR(254) NOT NULL ,"
-					+ " `password` CHAR(40)," + " `id` INT(9) NOT NULL AUTO_INCREMENT , "
+					+ " `password` CHAR(40)," + " `id` INT(6) NOT NULL AUTO_INCREMENT , "
 					+ "`regestrationdate` INT(10) NULL ," + "`activated` TINYINT(1) NOT NULL ,"
 					+ " PRIMARY KEY (`id`))");
 			preparedStatement.executeUpdate();
@@ -47,7 +47,7 @@ public class MySQLConnection {
 					+ " PRIMARY KEY (`id`))");
 			preparedStatement.executeUpdate();
 			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
-					+ "grouppermissions` ( `groupid` INT(5) NOT NULL , `permissionid` INT(9) NOT NULL )");
+					+ "grouppermissions` ( `groupid` INT(4) NOT NULL , `permissionid` INT(9) NOT NULL )");
 			preparedStatement.executeUpdate();
 			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
 					+ "groupsusers` ( `userid` INT(9) NOT NULL , `groupid` INT(5) NOT NULL )");
@@ -82,7 +82,7 @@ public class MySQLConnection {
 		} catch (ClassNotFoundException e1) {
 			System.out.println(TeachingIt.getInstance().PREFIX + "Fatal Error the system is now going to hold.");
 			e1.printStackTrace();
-			TeachingIt.getInstance().shutDown();
+			TeachingIt.getInstance().shutDown(1);
 			return null;
 		}
 		return con;
