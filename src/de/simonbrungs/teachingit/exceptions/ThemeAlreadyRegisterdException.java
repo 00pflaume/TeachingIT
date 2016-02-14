@@ -1,6 +1,6 @@
 package de.simonbrungs.teachingit.exceptions;
 
-public class ThemeAlreadyRegisterd extends Exception {
+public class ThemeAlreadyRegisterdException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 

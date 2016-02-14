@@ -15,7 +15,7 @@ import de.simonbrungs.teachingit.api.plugin.PluginManager;
 import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.commands.ShutDown;
 import de.simonbrungs.teachingit.connection.MySQLConnection;
-import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterd;
+import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
 public class TeachingIt {
@@ -130,7 +130,7 @@ public class TeachingIt {
 				System.out.println(PREFIX + "An error happend while loading the theme");
 				return false;
 			}
-		} catch (ThemeAlreadyRegisterd e) {
+		} catch (ThemeAlreadyRegisterdException e) {
 			e.printStackTrace();
 		}
 		return true;

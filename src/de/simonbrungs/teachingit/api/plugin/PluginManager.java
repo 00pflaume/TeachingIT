@@ -13,7 +13,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import de.simonbrungs.teachingit.api.plugin.theme.Theme;
-import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterd;
+import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
 
 public class PluginManager {
 	private ArrayList<Plugin> plugins = new ArrayList<>();
@@ -24,9 +24,9 @@ public class PluginManager {
 		return theme;
 	}
 
-	public boolean registerTheme(File pThemeJar) throws ThemeAlreadyRegisterd {
+	public boolean registerTheme(File pThemeJar) throws ThemeAlreadyRegisterdException {
 		if (this.theme != null)
-			throw new ThemeAlreadyRegisterd();
+			throw new ThemeAlreadyRegisterdException();
 		Properties propertieFile = getPropertieFile(pThemeJar);
 		if (propertieFile == null)
 			return false;
