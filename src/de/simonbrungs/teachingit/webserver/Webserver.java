@@ -27,6 +27,7 @@ public class Webserver {
 	private boolean shouldStop = false;
 	private Thread webserverThread;
 	private HashMap<String, File> registerdFiles = new HashMap<>();
+	public final String PREFIX = "[Webserver]";
 
 	public Webserver(String pAdress, int pPort) {
 		webserverThread = new Thread(new Runnable() {
@@ -56,7 +57,8 @@ public class Webserver {
 						 * } System.out.println(line); }
 						 */
 						String path = receiveRequest(reader);
-						System.out.println("request from " + socket.getRemoteSocketAddress() + " to path " + path);
+						System.out.println(
+								PREFIX + "request from " + socket.getRemoteSocketAddress() + " to path " + path);
 						User user = new User(path, null, socket.getRemoteSocketAddress());
 						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(null);
 						TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
