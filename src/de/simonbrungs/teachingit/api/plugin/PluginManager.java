@@ -71,10 +71,10 @@ public class PluginManager {
 			loader = new URLClassLoader(new URL[] { pPluginJar.toURI().toURL() });
 			Class<?> cl = loader.loadClass(propertieFile.getProperty("main"));
 			if (pSearchedSuperClass.isAssignableFrom(cl)) {
-				Plugin clazz = (Plugin) cl.getDeclaredConstructor().newInstance();
+				Plugin instance = (Plugin) cl.getDeclaredConstructor().newInstance();
 				try {
 					try {
-						clazz.onEnable();
+						instance.onEnable();
 					} catch (Throwable e) {
 						e.printStackTrace();
 					}
@@ -82,7 +82,7 @@ public class PluginManager {
 					e.printStackTrace();
 					return null;
 				}
-				return clazz;
+				return instance;
 			}
 			return null;
 		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e1) {
@@ -124,12 +124,9 @@ public class PluginManager {
 			System.out.println(pluginManagerPrefix + "The given plugin \"" + propertieFile.getProperty("main")
 					+ "\" class could not be found.");
 			e.printStackTrace();
-		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
+		} catch (MalformedURLException | InstantiationException | IllegalAccessException | SecurityException
+				| IllegalArgumentException e) {
 			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		}
 	}

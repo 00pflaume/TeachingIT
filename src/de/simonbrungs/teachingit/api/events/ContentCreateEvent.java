@@ -5,7 +5,7 @@ import de.simonbrungs.teachingit.api.users.User;
 public class ContentCreateEvent extends Event {
 	private boolean canceld = false;
 	private String content = null;
-	private User user = null;
+	private User user;
 	private String title = null;
 
 	public ContentCreateEvent(User pUser) {

@@ -106,7 +106,6 @@ public class TeachingIt {
 				pluginManager.registerPlugin(fileEntry);
 			}
 		}
-
 	}
 
 	private boolean loadTheme() {

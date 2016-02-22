@@ -8,12 +8,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,19 +51,22 @@ public class Webserver {
 							BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 							OutputStream output = socket.getOutputStream();
 							PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
-						/*
-						 * String line = reader.readLine(); String useragent =
-						 * "";
-						 * 
-						 * if (line != null) while (!line.isEmpty()) { line =
-						 * reader.readLine(); if
-						 * (line.startsWith("User-Agent:")) { useragent = line;
-						 * } System.out.println(line); }
-						 */
-						String path = receiveRequest(reader);
-						System.out.println(
-								PREFIX + "request from " + socket.getRemoteSocketAddress() + " to path " + path);
-						User user = new User(path, null, socket.getRemoteSocketAddress());
+						String path = getPath(reader);
+						System.out.println(PREFIX + "request from " + socket.getInetAddress() + " to path " + path);
+						HashMap<String, Object> postRequests = new HashMap<String, Object>();
+						System.out.println("test1");
+						{
+							String query;
+							if (reader.ready()) {
+								if ((query = reader.readLine()) != null) {
+									System.out.println("test2");
+									parseQuery(query, postRequests);
+								}
+								System.out.println("test3");
+								reader.reset();
+							}
+						}
+						User user = new User(path, null, socket.getRemoteSocketAddress(), postRequests);
 						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(null);
 						TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
 						if (!websiteCallEvent.isCanceld()) {
@@ -114,7 +121,55 @@ public class Webserver {
 
 	}
 
-	private String receiveRequest(BufferedReader reader) throws IOException {
+	private void parseQuery(String query, Map<String, Object> parameters) throws UnsupportedEncodingException {
+		System.out.println("supertest");
+		if (query != null) {
+			System.out.println("test1");
+			String[] pairs = query.split("[&]");
+			System.out.println("test2");
+
+			for (String pair : pairs) {
+				System.out.println("test3");
+
+				String[] param = pair.split("[=]");
+				System.out.println("test4");
+
+				String key = null;
+				String value = null;
+				System.out.println("test5");
+				if (param.length > 0) {
+					key = URLDecoder.decode(param[0], System.getProperty("file.encoding"));
+					System.out.println("test1");
+
+				}
+				System.out.println("test6");
+
+				if (param.length > 1) {
+					value = URLDecoder.decode(param[1], System.getProperty("file.encoding"));
+					System.out.println("test1");
+				}
+				System.out.println("test7");
+				if (parameters.containsKey(key)) {
+					Object obj = parameters.get(key);
+					if (obj instanceof List<?>) {
+						@SuppressWarnings("unchecked")
+						List<String> values = (List<String>) obj;
+						values.add(value);
+
+					} else if (obj instanceof String) {
+						List<String> values = new ArrayList<String>();
+						values.add((String) obj);
+						values.add(value);
+						parameters.put(key, values);
+					}
+				} else {
+					parameters.put(key, value);
+				}
+			}
+		}
+	}
+
+	private String getPath(BufferedReader reader) throws IOException {
 		final Pattern getLinePattern = Pattern.compile("(?i)GET\\s+/(.*?)\\s+HTTP/1\\.[01]");
 		String resource = null;
 		for (String line = reader.readLine(); !line.isEmpty(); line = reader.readLine()) {
