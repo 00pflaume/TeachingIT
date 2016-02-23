@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,21 +50,16 @@ public class Webserver {
 							BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 							OutputStream output = socket.getOutputStream();
 							PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
-						String path = getPath(reader);
-						System.out.println(PREFIX + "request from " + socket.getInetAddress() + " to path " + path);
-						HashMap<String, Object> postRequests = new HashMap<String, Object>();
-						System.out.println("test1");
+						ArrayList<String> inputstring = new ArrayList<>();
 						{
-							String query;
-							if (reader.ready()) {
-								if ((query = reader.readLine()) != null) {
-									System.out.println("test2");
-									parseQuery(query, postRequests);
-								}
-								System.out.println("test3");
-								reader.reset();
-							}
+							for (String line = reader.readLine(); !line.isEmpty(); line = reader.readLine())
+								inputstring.add(line);
 						}
+						HashMap<String, Object> postRequests = new HashMap<String, Object>();
+						postRequests = parseQuery(inputstring);
+						String path = getPath(inputstring);
+						System.out.println(PREFIX + "request from " + socket.getInetAddress() + " to path " + path);
+						System.out.println("test1");
 						User user = new User(path, null, socket.getRemoteSocketAddress(), postRequests);
 						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(null);
 						TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
@@ -107,7 +101,7 @@ public class Webserver {
 										+ "</body></html>";
 								writer.println("HTTP/1.0 200 OK");
 								writer.println("Content-Type: text/html; charset=ISO-8859-1");
-								writer.println("Server: NanoHTTPServer");
+								writer.println("Server: HTTPServer");
 								writer.println();
 								writer.println(response);
 							}
@@ -121,7 +115,10 @@ public class Webserver {
 
 	}
 
-	private void parseQuery(String query, Map<String, Object> parameters) throws UnsupportedEncodingException {
+	private HashMap<String, Object> parseQuery(ArrayList<String> list) throws UnsupportedEncodingException {
+		HashMap<String, Object> parameters = new HashMap<>();
+		String query = null;
+		query = list.get(0);
 		System.out.println("supertest");
 		if (query != null) {
 			System.out.println("test1");
@@ -167,12 +164,13 @@ public class Webserver {
 				}
 			}
 		}
+		return parameters;
 	}
 
-	private String getPath(BufferedReader reader) throws IOException {
+	private String getPath(ArrayList<String> list) throws IOException {
 		final Pattern getLinePattern = Pattern.compile("(?i)GET\\s+/(.*?)\\s+HTTP/1\\.[01]");
-		String resource = null;
-		for (String line = reader.readLine(); !line.isEmpty(); line = reader.readLine()) {
+		String resource = "";
+		for (String line : list) {
 			Matcher matcher = getLinePattern.matcher(line);
 			if (matcher.matches())
 				resource = matcher.group(1);
