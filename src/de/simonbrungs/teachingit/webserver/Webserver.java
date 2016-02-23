@@ -52,8 +52,11 @@ public class Webserver {
 							PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
 						ArrayList<String> inputstring = new ArrayList<>();
 						{
-							for (String line = reader.readLine(); !line.isEmpty(); line = reader.readLine())
+							for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+								if (line.isEmpty())
+									break;
 								inputstring.add(line);
+							}
 						}
 						HashMap<String, Object> postRequests = new HashMap<String, Object>();
 						postRequests = parseQuery(inputstring);
