@@ -56,15 +56,14 @@ public class Webserver {
 								if (line.isEmpty())
 									break;
 								inputstring.add(line);
+								System.out.println(line);
 							}
 						}
-						HashMap<String, Object> postRequests = new HashMap<String, Object>();
-						postRequests = parseQuery(inputstring);
+						HashMap<String, Object> postRequests = parseQuery(inputstring);
 						String path = getPath(inputstring);
 						System.out.println(PREFIX + "request from " + socket.getInetAddress() + " to path " + path);
-						System.out.println("test1");
 						User user = new User(path, null, socket.getRemoteSocketAddress(), postRequests);
-						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(null);
+						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(user);
 						TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
 						if (!websiteCallEvent.isCanceld()) {
 							File file = registerdFiles.get(path);
@@ -72,7 +71,7 @@ public class Webserver {
 								List<String> lines = Files.readAllLines(Paths.get(path));
 								writer.println("HTTP/1.0 200 OK");
 								writer.println("Content-Type: text/html; charset=ISO-8859-1");
-								writer.println("Server: NanoHTTPServer");
+								writer.println("Server: HTTPServer");
 								writer.println();
 								String response = lines.get(0);
 								lines.remove(0);
@@ -120,35 +119,29 @@ public class Webserver {
 
 	private HashMap<String, Object> parseQuery(ArrayList<String> list) throws UnsupportedEncodingException {
 		HashMap<String, Object> parameters = new HashMap<>();
-		String query = null;
-		query = list.get(0);
-		System.out.println("supertest");
+		if (list.isEmpty())
+			return parameters;
+		String query = list.get(0);
 		if (query != null) {
-			System.out.println("test1");
 			String[] pairs = query.split("[&]");
-			System.out.println("test2");
-
 			for (String pair : pairs) {
-				System.out.println("test3");
-
 				String[] param = pair.split("[=]");
-				System.out.println("test4");
-
 				String key = null;
 				String value = null;
-				System.out.println("test5");
 				if (param.length > 0) {
-					key = URLDecoder.decode(param[0], System.getProperty("file.encoding"));
-					System.out.println("test1");
-
+					try {
+						key = URLDecoder.decode(param[0], System.getProperty("file.encoding"));
+					} catch (IllegalArgumentException e) {
+						return parameters;
+					}
 				}
-				System.out.println("test6");
-
 				if (param.length > 1) {
-					value = URLDecoder.decode(param[1], System.getProperty("file.encoding"));
-					System.out.println("test1");
+					try {
+						value = URLDecoder.decode(param[1], System.getProperty("file.encoding"));
+					} catch (IllegalArgumentException e) {
+						return parameters;
+					}
 				}
-				System.out.println("test7");
 				if (parameters.containsKey(key)) {
 					Object obj = parameters.get(key);
 					if (obj instanceof List<?>) {
@@ -171,12 +164,21 @@ public class Webserver {
 	}
 
 	private String getPath(ArrayList<String> list) throws IOException {
-		final Pattern getLinePattern = Pattern.compile("(?i)GET\\s+/(.*?)\\s+HTTP/1\\.[01]");
+		Pattern getLinePattern = Pattern.compile("(?i)GET\\s+/(.*?)\\s+HTTP/1\\.[01]");
 		String resource = "";
 		for (String line : list) {
 			Matcher matcher = getLinePattern.matcher(line);
 			if (matcher.matches())
 				resource = matcher.group(1);
+		}
+		if (resource.equals("")) {
+			getLinePattern = Pattern.compile("(?i)POST\\s+/(.*?)\\s+HTTP/1\\.[01]");
+			resource = "";
+			for (String line : list) {
+				Matcher matcher = getLinePattern.matcher(line);
+				if (matcher.matches())
+					resource = matcher.group(1);
+			}
 		}
 		return resource;
 	}

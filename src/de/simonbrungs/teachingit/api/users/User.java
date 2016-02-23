@@ -13,6 +13,7 @@ public class User {
 		path = pPath;
 		account = pAccount;
 		socketAddress = pSocketAddress;
+		postRequests = pPostRequests;
 	}
 
 	public Object getPostRequest(String pKey) {

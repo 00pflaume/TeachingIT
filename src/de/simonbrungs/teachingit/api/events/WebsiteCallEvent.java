@@ -1,13 +1,13 @@
 package de.simonbrungs.teachingit.api.events;
 
-import com.sun.net.httpserver.HttpExchange;
+import de.simonbrungs.teachingit.api.users.User;
 
 public class WebsiteCallEvent extends Event {
 	private boolean isCanceld = false;
-	private HttpExchange httpExchange;
+	private User user;
 
-	public WebsiteCallEvent(HttpExchange pHttpExchange) {
-		httpExchange = pHttpExchange;
+	public WebsiteCallEvent(User user) {
+		this.user = user;
 	}
 
 	@Override
@@ -24,8 +24,8 @@ public class WebsiteCallEvent extends Event {
 		isCanceld = pCanceld;
 	}
 
-	public HttpExchange getHttpExchange() {
-		return httpExchange;
+	public User getUser() {
+		return user;
 	}
 
 }
