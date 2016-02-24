@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+import java.util.logging.XMLFormatter;
 
 import de.simonbrungs.teachingit.api.Console;
 import de.simonbrungs.teachingit.api.events.EventExecuter;
@@ -30,6 +35,8 @@ public class TeachingIt {
 	private MySQLConnection con;
 	private GroupManager groupManager;
 	private AccountManager accountManager;
+	private FileHandler fh;
+	private Logger logger;
 
 	public static void main(String[] args) {
 		new TeachingIt();
@@ -43,14 +50,32 @@ public class TeachingIt {
 		return groupManager;
 	}
 
+	public Logger getLogger() {
+		return logger;
+	}
+
 	public AccountManager getAccountManager() {
 		return accountManager;
 	}
 
 	public TeachingIt() {
 		main = this;
+		try {
+			LogManager lm = LogManager.getLogManager();
+			fh = new FileHandler("log.xml");
+			logger = Logger.getLogger("log");
+			lm.addLogger(logger);
+			logger.setLevel(Level.INFO);
+			fh.setFormatter(new XMLFormatter());
+			logger.addHandler(fh);
+		} catch (SecurityException | IOException e) {
+			System.out.println(PREFIX + "Fatal Error!");
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			shutDown(1);
+		}
+		logger.log(Level.INFO, PREFIX + "Server is starting");
 		if (createConfig()) {
-			System.out.println(PREFIX + "The Config was created. Please input your data into the config file.");
+			logger.log(Level.WARNING, PREFIX + "The Config was created. Please input your data into the config file.");
 			return;
 		}
 		config = initConfig();
@@ -61,18 +86,18 @@ public class TeachingIt {
 		eventExecuter = new EventExecuter();
 		groupManager = new GroupManager();
 		accountManager = new AccountManager();
-		System.out.println(PREFIX + "Now going to load plugins.");
+		logger.log(Level.INFO, PREFIX + "Now going to load plugins.");
 		loadPlugins();
-		System.out.println(PREFIX + "Plugins loaded.");
-		System.out.println(PREFIX + "Now going to load theme");
+		logger.log(Level.INFO, PREFIX + "Plugins loaded.");
+		logger.log(Level.INFO, PREFIX + "Now going to load theme");
 		if (loadTheme()) {
-			System.out.println(PREFIX + "The server is started");
+			logger.log(Level.INFO, PREFIX + "The server is started");
 			webserver = new Webserver(config.getProperty("WebServerPath"),
 					Integer.parseInt(config.getProperty("WebServerPort")));
 			registerIncludes();
 			console.commandsReader();
 		} else {
-			System.out.println(PREFIX + "The server is now going to hold.");
+			logger.log(Level.INFO, PREFIX + "The server is now going to hold.");
 			shutDown(0);
 		}
 	}
@@ -83,7 +108,6 @@ public class TeachingIt {
 			folder.mkdirs();
 		}
 		for (final File fileEntry : folder.listFiles()) {
-			System.out.println(fileEntry.getName());
 			getWebserver().registerFile(fileEntry, fileEntry.getName());
 		}
 	}
@@ -112,25 +136,25 @@ public class TeachingIt {
 		final File folder = new File("theme");
 		if (!folder.exists()) {
 			folder.mkdirs();
-			System.out.println(PREFIX + "Put a theme which is named theme.jar into the theme folder");
+			logger.log(Level.WARNING, PREFIX + "Put a theme which is named theme.jar into the theme folder");
 			return false;
 		}
 		File theme = new File("theme/theme.jar");
 		if (!theme.exists()) {
-			System.out.println(PREFIX + "Put a theme which is named theme.jar into the theme folder");
+			logger.log(Level.WARNING, PREFIX + "Put a theme which is named theme.jar into the theme folder");
 			return false;
 		}
 		if (theme.isDirectory()) {
-			System.out.println(PREFIX + "Put a theme which is named theme.jar into the theme folder");
+			logger.log(Level.WARNING, PREFIX + "Put a theme which is named theme.jar into the theme folder");
 			return false;
 		}
 		try {
 			if (!pluginManager.registerTheme(theme)) {
-				System.out.println(PREFIX + "An error happend while loading the theme");
+				logger.log(Level.WARNING, PREFIX + "An error occurred while loading the theme");
 				return false;
 			}
 		} catch (ThemeAlreadyRegisterdException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		return true;
 	}
@@ -140,13 +164,21 @@ public class TeachingIt {
 	}
 
 	public void shutDown(int pExitState) {
-		shouldClose = true;
-		if (webserver != null) {
-			webserver.stop();
+		try {
+			logger.log(Level.INFO, PREFIX + "Server is starting to ShutDown");
+			shouldClose = true;
+			if (webserver != null) {
+				webserver.stop();
+			}
+			fh.close();
+			getPluginManager().unregisterAllPlugins();
+			logger.log(Level.INFO, PREFIX + "GoodBye");
+		} catch (Throwable e) {
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			logger.log(Level.WARNING, PREFIX + "Error while shuttingdown");
+		} finally {
+			Runtime.getRuntime().exit(pExitState);
 		}
-		System.out.println(PREFIX + "The server is now going to hold. Goodbye");
-		getPluginManager().unregisterAllPlugins();
-		Runtime.getRuntime().exit(pExitState);
 	}
 
 	public boolean getShouldClose() {
@@ -187,6 +219,7 @@ public class TeachingIt {
 				prop.setProperty("WebServerDomain", "localhost");
 				prop.setProperty("WebServerPath", "/");
 				prop.setProperty("WebServerPort", "80");
+				prop.setProperty("SiteName", "TeachingIt");
 				prop.setProperty("MySQLHost", "localhost");
 				prop.setProperty("MySQLPort", "3306");
 				prop.setProperty("MySQLUser", "root");
@@ -206,7 +239,7 @@ public class TeachingIt {
 				try {
 					output.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 				}
 			}
 		}
@@ -231,7 +264,7 @@ public class TeachingIt {
 				try {
 					input.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 				}
 			}
 		}

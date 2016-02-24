@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.users.Account;
@@ -33,7 +34,7 @@ public class Group {
 				superGroupID = resultSet.getInt("supergroup");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		if (superGroupID != -1)
@@ -53,7 +54,7 @@ public class Group {
 				groupName = resultSet.getString("groupname");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		return groupName;
@@ -71,7 +72,7 @@ public class Group {
 			preparedStatement.setString(1, pNewGroupName);
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 	}
@@ -103,7 +104,7 @@ public class Group {
 				permissionHeight = resultSet.getInt("permissionheight");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		return permissionHeight;
@@ -123,7 +124,7 @@ public class Group {
 			preparedStatement.setInt(2, perm.getPermissionID());
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		return true;
@@ -140,7 +141,7 @@ public class Group {
 			while (resultSet.next())
 				permissions.add(new Permission(resultSet.getInt("permissionid")));
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		return permissions;
@@ -166,7 +167,7 @@ public class Group {
 				}
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnection().closeConnection(con);
@@ -183,7 +184,7 @@ public class Group {
 					+ pPermissionHeight + "' WHERE id='" + groupID + "' LIMIT 1");
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 	}
@@ -223,7 +224,7 @@ public class Group {
 								+ "permissions` WHERE id = '" + pPermission.getPermissionID() + "' LIMIT 1");
 				preparedStatement.execute();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			} finally {
 				TeachingIt.getInstance().getConnection().closeConnection(con);
 			}

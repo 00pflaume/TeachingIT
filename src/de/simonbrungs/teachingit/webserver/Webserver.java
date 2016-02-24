@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +31,7 @@ public class Webserver {
 	private boolean shouldStop = false;
 	private Thread webserverThread;
 	private HashMap<String, File> registerdFiles = new HashMap<>();
-	public final String PREFIX = "[Webserver]";
+	public final String PREFIX = "[Webserver] ";
 
 	public Webserver(String pAdress, int pPort) {
 		webserverThread = new Thread(new Runnable() {
@@ -50,18 +51,13 @@ public class Webserver {
 							BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 							OutputStream output = socket.getOutputStream();
 							PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
-						ArrayList<String> inputstring = new ArrayList<>();
-						{
-							for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-								if (line.isEmpty())
-									break;
-								inputstring.add(line);
-								System.out.println(line);
-							}
-						}
-						HashMap<String, Object> postRequests = parseQuery(inputstring);
+						Object[] collection = readPost(reader);
+						@SuppressWarnings("unchecked")
+						ArrayList<String> inputstring = (ArrayList<String>) collection[0];
+						HashMap<String, Object> postRequests = parseQuery((String) collection[1]);
 						String path = getPath(inputstring);
-						System.out.println(PREFIX + "request from " + socket.getInetAddress() + " to path " + path);
+						TeachingIt.getInstance().getLogger().log(Level.INFO,
+								PREFIX + "Request from " + socket.getInetAddress() + " to path " + path);
 						User user = new User(path, null, socket.getRemoteSocketAddress(), postRequests);
 						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(user);
 						TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
@@ -112,16 +108,54 @@ public class Webserver {
 					}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 
 	}
 
-	private HashMap<String, Object> parseQuery(ArrayList<String> list) throws UnsupportedEncodingException {
+	@SuppressWarnings("unchecked")
+	private Object[] readPost(BufferedReader reader) throws IOException {
+		Object[] toReturn = new Object[2];
+		toReturn[0] = new ArrayList<String>();
+		String line = reader.readLine();
+		((ArrayList<String>) toReturn[0]).add(line);
+		StringBuilder raw = new StringBuilder();
+		raw.append("" + line);
+		boolean isPost = false;
+		if (line != null)
+			isPost = line.startsWith("POST");
+		int contentLength = 0;
+		boolean shouldRun = true;
+		while (shouldRun) {
+			if ((line = reader.readLine()) != null)
+				if (line.equals("")) {
+					shouldRun = false;
+					break;
+				}
+			((ArrayList<String>) toReturn[0]).add(line);
+			raw.append('\n' + line);
+			if (isPost) {
+				final String contentHeader = "Content-Length: ";
+				if (line.startsWith(contentHeader)) {
+					contentLength = Integer.parseInt(line.substring(contentHeader.length()));
+				}
+			}
+		}
+		StringBuilder body = new StringBuilder();
+		if (isPost) {
+			int c = 0;
+			for (int i = 0; i < contentLength; i++) {
+				c = reader.read();
+				body.append((char) c);
+			}
+		}
+		raw.append(body.toString());
+		toReturn[1] = (raw.toString());
+		return toReturn;
+	}
+
+	private HashMap<String, Object> parseQuery(String query) throws UnsupportedEncodingException {
 		HashMap<String, Object> parameters = new HashMap<>();
-		if (list.isEmpty())
-			return parameters;
-		String query = list.get(0);
 		if (query != null) {
 			String[] pairs = query.split("[&]");
 			for (String pair : pairs) {

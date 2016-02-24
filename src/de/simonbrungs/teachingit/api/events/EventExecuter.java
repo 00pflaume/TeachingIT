@@ -1,11 +1,14 @@
 package de.simonbrungs.teachingit.api.events;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+
+import de.simonbrungs.teachingit.TeachingIt;
 
 public class EventExecuter {
 	ArrayList<ListenerEntry> registerdEvents = new ArrayList<>();
 
-	public void registerEventExecuter(Listener<?> pListener, Class<?> pClass, int pPriority) {
+	public void registerListener(Listener<?> pListener, Class<?> pClass, int pPriority) {
 		ListenerEntry entry = new ListenerEntry(pListener, pClass, pPriority);
 		registerdEvents.add(entry);
 		sortByListenerPriority(registerdEvents);
@@ -40,7 +43,7 @@ public class EventExecuter {
 				try {
 					listenerEntry.getExecutiveListener().executeEvent(pEvent);
 				} catch (Exception e) {
-					e.printStackTrace();
+					TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 				}
 				if (pEvent.isCanceld()) {
 					return;

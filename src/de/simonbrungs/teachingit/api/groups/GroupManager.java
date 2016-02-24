@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 
@@ -27,7 +28,7 @@ public class GroupManager {
 			preparedStatement.setInt(4, pPermissionheight);
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		return getGroup(pGroupName);
@@ -43,7 +44,7 @@ public class GroupManager {
 							+ pGroupID + "' LIMIT 1");
 			preparedStatement.execute();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 	}
@@ -69,7 +70,7 @@ public class GroupManager {
 				groupID = resultSet.getInt("id");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		if (groupID == -1)
@@ -90,7 +91,7 @@ public class GroupManager {
 				groupID = resultSet.getInt("id");
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		if (groupID == -1)
@@ -110,7 +111,7 @@ public class GroupManager {
 				groups.add(new Group(resultSet.getInt("id")));
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		return groups;

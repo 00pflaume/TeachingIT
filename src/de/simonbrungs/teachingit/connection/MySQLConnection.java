@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 
@@ -57,7 +58,7 @@ public class MySQLConnection {
 					+ " `userid` INT NOT NULL ," + " `metavalue` INT NOT NULL )");
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		closeConnection(con);
 	}
@@ -81,11 +82,11 @@ public class MySQLConnection {
 			con = DriverManager.getConnection(
 					"jdbc:mysql://" + host + ":" + port + "/?user=" + user + "&password=" + password + add);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			return null;
 		} catch (ClassNotFoundException e1) {
 			System.out.println(TeachingIt.getInstance().PREFIX + "Fatal Error the system is now going to hold.");
-			e1.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e1.getMessage());
 			TeachingIt.getInstance().shutDown(1);
 			return null;
 		}

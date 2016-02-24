@@ -9,9 +9,11 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.plugin.theme.Theme;
 import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
 
@@ -52,14 +54,14 @@ public class PluginManager {
 		} catch (ClassNotFoundException e) {
 			System.out.println(pluginManagerPrefix + "The given plugin \"" + propertieFile.getProperty("main")
 					+ "\" class could not be found.");
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
 			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		} catch (SecurityException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		return false;
 	}
@@ -76,17 +78,17 @@ public class PluginManager {
 					try {
 						instance.onEnable();
 					} catch (Throwable e) {
-						e.printStackTrace();
+						TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 					}
 				} catch (Throwable e) {
-					e.printStackTrace();
+					TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 					return null;
 				}
 				return instance;
 			}
 			return null;
 		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e1) {
-			e1.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e1.getMessage());
 		} finally {
 			try {
 				if (loader != null) {
@@ -94,7 +96,7 @@ public class PluginManager {
 				}
 			} catch (IOException e) {
 				System.out.println(pluginManagerPrefix + "URLClassLoader could not be closed.");
-				e.printStackTrace();
+				TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			}
 		}
 		return null;
@@ -123,11 +125,11 @@ public class PluginManager {
 		} catch (ClassNotFoundException e) {
 			System.out.println(pluginManagerPrefix + "The given plugin \"" + propertieFile.getProperty("main")
 					+ "\" class could not be found.");
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException | SecurityException
 				| IllegalArgumentException e) {
 			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 	}
 
@@ -149,14 +151,14 @@ public class PluginManager {
 			prop.load(stream);
 			return prop;
 		} catch (IOException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			return null;
 		} finally {
 			if (zipFile != null) {
 				try {
 					zipFile.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 				}
 			}
 		}
@@ -172,7 +174,7 @@ public class PluginManager {
 			try {
 				pPlugin.onDisable();
 			} catch (Throwable e) {
-				e.printStackTrace();
+				TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			}
 			plugins.remove(pPlugin);
 		}

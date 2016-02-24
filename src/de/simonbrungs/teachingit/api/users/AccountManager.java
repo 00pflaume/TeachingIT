@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.events.AccountDeleteEvent;
@@ -34,7 +35,7 @@ public class AccountManager {
 				return null;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnection().closeConnection(con);
@@ -55,7 +56,7 @@ public class AccountManager {
 				return null;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnection().closeConnection(con);
@@ -75,7 +76,7 @@ public class AccountManager {
 				return null;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnection().closeConnection(con);
@@ -109,7 +110,7 @@ public class AccountManager {
 			TeachingIt.getInstance().getEventExecuter().executeEvent(new AfterAccountCreationEvent(account));
 			return account;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnection().closeConnection(con);
@@ -141,7 +142,7 @@ public class AccountManager {
 			preparedStatement.executeUpdate();
 			return true;
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			return false;
 		} finally {
 			TeachingIt.getInstance().getConnection().closeConnection(con);
@@ -163,7 +164,7 @@ public class AccountManager {
 			}
 			return sb.toString();
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		return null;
 	}

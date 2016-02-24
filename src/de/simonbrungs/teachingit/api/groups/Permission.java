@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 
@@ -27,7 +28,7 @@ public class Permission {
 				permissionID = -1;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 	}
@@ -49,7 +50,7 @@ public class Permission {
 				permissionID = -1;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 	}
@@ -70,7 +71,7 @@ public class Permission {
 				return false;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		return false;
@@ -90,7 +91,7 @@ public class Permission {
 				return false;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 		TeachingIt.getInstance().getConnection().closeConnection(con);
 		return false;
@@ -120,7 +121,7 @@ public class Permission {
 				preparedStatement.setString(2, pPermission);
 				preparedStatement.executeQuery();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			}
 			TeachingIt.getInstance().getConnection().closeConnection(con);
 			perm = new Permission(pPermission);
