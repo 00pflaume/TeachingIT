@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -19,7 +20,7 @@ import de.simonbrungs.teachingit.api.groups.GroupManager;
 import de.simonbrungs.teachingit.api.plugin.PluginManager;
 import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.commands.ShutDown;
-import de.simonbrungs.teachingit.connection.MySQLConnection;
+import de.simonbrungs.teachingit.connector.MySQLConnector;
 import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
@@ -32,7 +33,7 @@ public class TeachingIt {
 	private PluginManager pluginManager = new PluginManager();
 	public final String PREFIX = "[TeachingIt] ";
 	private EventExecuter eventExecuter;
-	private MySQLConnection con;
+	private MySQLConnector connector;
 	private GroupManager groupManager;
 	private AccountManager accountManager;
 	private FileHandler fh;
@@ -62,7 +63,24 @@ public class TeachingIt {
 		main = this;
 		try {
 			LogManager lm = LogManager.getLogManager();
-			fh = new FileHandler("log.xml");
+			File folder = new File("logs");
+			if (!folder.exists())
+				folder.mkdirs();
+			String minute = Calendar.getInstance().get(Calendar.MINUTE) + "";
+			if (minute.length() < 2) {
+				minute = "0" + minute;
+			}
+			File file = new File("./logs/" + Calendar.getInstance().get(Calendar.YEAR) + "-"
+					+ Calendar.getInstance().get(Calendar.MONTH) + "-"
+					+ Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "-"
+					+ Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "-" + minute + ".xml");
+			int count = 0;
+			while (file.exists()) {
+				count++;
+				file = new File(
+						"./logs/" + file.getName().substring(0, file.getName().length() - 4) + "-" + count + ".xml");
+			}
+			fh = new FileHandler(file.getAbsolutePath());
 			logger = Logger.getLogger("log");
 			lm.addLogger(logger);
 			logger.setLevel(Level.INFO);
@@ -73,31 +91,32 @@ public class TeachingIt {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			shutDown(1);
 		}
-		logger.log(Level.INFO, PREFIX + "Server is starting");
+		getLogger().log(Level.INFO, PREFIX + "Server is starting");
 		if (createConfig()) {
-			logger.log(Level.WARNING, PREFIX + "The Config was created. Please input your data into the config file.");
+			getLogger().log(Level.WARNING,
+					PREFIX + "The Config was created. Please input your data into the config file.");
 			return;
 		}
 		config = initConfig();
 		registerCommands();
-		con = new MySQLConnection(config.getProperty("MySQLUser"), config.getProperty("MySQLPassword"),
+		connector = new MySQLConnector(config.getProperty("MySQLUser"), config.getProperty("MySQLPassword"),
 				Integer.parseInt(config.getProperty("MySQLPort")), config.getProperty("MySQLHost"),
 				config.getProperty("MySQLTablePrefix"), config.getProperty("MySQLDatabase"));
 		eventExecuter = new EventExecuter();
 		groupManager = new GroupManager();
 		accountManager = new AccountManager();
-		logger.log(Level.INFO, PREFIX + "Now going to load plugins.");
+		getLogger().log(Level.INFO, PREFIX + "Now going to load plugins.");
 		loadPlugins();
-		logger.log(Level.INFO, PREFIX + "Plugins loaded.");
-		logger.log(Level.INFO, PREFIX + "Now going to load theme");
+		getLogger().log(Level.INFO, PREFIX + "Plugins loaded.");
+		getLogger().log(Level.INFO, PREFIX + "Now going to load theme");
 		if (loadTheme()) {
-			logger.log(Level.INFO, PREFIX + "The server is started");
+			getLogger().log(Level.INFO, PREFIX + "The server is started");
 			webserver = new Webserver(config.getProperty("WebServerPath"),
 					Integer.parseInt(config.getProperty("WebServerPort")));
 			registerIncludes();
 			console.commandsReader();
 		} else {
-			logger.log(Level.INFO, PREFIX + "The server is now going to hold.");
+			getLogger().log(Level.INFO, PREFIX + "The server is now going to hold.");
 			shutDown(0);
 		}
 	}
@@ -116,8 +135,8 @@ public class TeachingIt {
 		return webserver;
 	}
 
-	public MySQLConnection getConnection() {
-		return con;
+	public MySQLConnector getConnector() {
+		return connector;
 	}
 
 	private void loadPlugins() {
@@ -136,21 +155,21 @@ public class TeachingIt {
 		final File folder = new File("theme");
 		if (!folder.exists()) {
 			folder.mkdirs();
-			logger.log(Level.WARNING, PREFIX + "Put a theme which is named theme.jar into the theme folder");
+			getLogger().log(Level.WARNING, PREFIX + "Put a theme which is named theme.jar into the theme folder");
 			return false;
 		}
 		File theme = new File("theme/theme.jar");
 		if (!theme.exists()) {
-			logger.log(Level.WARNING, PREFIX + "Put a theme which is named theme.jar into the theme folder");
+			getLogger().log(Level.WARNING, PREFIX + "Put a theme which is named theme.jar into the theme folder");
 			return false;
 		}
 		if (theme.isDirectory()) {
-			logger.log(Level.WARNING, PREFIX + "Put a theme which is named theme.jar into the theme folder");
+			getLogger().log(Level.WARNING, PREFIX + "Put a theme which is named theme.jar into the theme folder");
 			return false;
 		}
 		try {
 			if (!pluginManager.registerTheme(theme)) {
-				logger.log(Level.WARNING, PREFIX + "An error occurred while loading the theme");
+				getLogger().log(Level.WARNING, PREFIX + "An error occurred while loading the theme");
 				return false;
 			}
 		} catch (ThemeAlreadyRegisterdException e) {
@@ -165,17 +184,17 @@ public class TeachingIt {
 
 	public void shutDown(int pExitState) {
 		try {
-			logger.log(Level.INFO, PREFIX + "Server is starting to ShutDown");
+			getLogger().log(Level.INFO, PREFIX + "Server is going to ShutDown");
 			shouldClose = true;
 			if (webserver != null) {
 				webserver.stop();
 			}
 			fh.close();
 			getPluginManager().unregisterAllPlugins();
-			logger.log(Level.INFO, PREFIX + "GoodBye");
+			getLogger().log(Level.INFO, PREFIX + "GoodBye");
 		} catch (Throwable e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
-			logger.log(Level.WARNING, PREFIX + "Error while shuttingdown");
+			getLogger().log(Level.WARNING, PREFIX + "Error while shuttingdown");
 		} finally {
 			Runtime.getRuntime().exit(pExitState);
 		}

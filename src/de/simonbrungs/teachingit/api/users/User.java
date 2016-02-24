@@ -8,6 +8,7 @@ public class User {
 	private String path;
 	private SocketAddress socketAddress;
 	private HashMap<String, Object> postRequests;
+	private HashMap<String, String> userVars = new HashMap<>();
 
 	public User(String pPath, Account pAccount, SocketAddress pSocketAddress, HashMap<String, Object> pPostRequests) {
 		path = pPath;
@@ -18,6 +19,25 @@ public class User {
 
 	public Object getPostRequest(String pKey) {
 		return postRequests.get(pKey);
+	}
+
+	/**
+	 * As soon as the site is builded up this is getting deleted
+	 */
+	public void setUserVar(String pKey, String pValue) {
+		userVars.put(pKey, pValue);
+	}
+
+	public String getUserVar(String pKey) {
+		return userVars.get(pKey);
+	}
+
+	public String removeUserVar(String pKey) {
+		return userVars.remove(pKey);
+	}
+
+	public void setAccount(Account pAccount) {
+
 	}
 
 	public String getStringPostRequest(String pKey) {

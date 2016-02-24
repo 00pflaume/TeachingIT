@@ -120,7 +120,7 @@ public class PluginManager {
 			Plugin pluginInstance = null;
 			pluginInstance = (Plugin) loadPlugin(pPluginJar, propertieFile, Plugin.class);
 			if (pluginInstance != null) {
-				TeachingIt.getInstance().getLogger().log(Level.WARNING,
+				TeachingIt.getInstance().getLogger().log(Level.INFO,
 						PLUGINMANAGERPREFIX + "The plugin " + propertieFile.getProperty("name") + " (version "
 								+ propertieFile.getProperty("version") + ") from " + propertieFile.getProperty("author")
 								+ " was successfully enabled.");

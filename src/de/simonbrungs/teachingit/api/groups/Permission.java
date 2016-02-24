@@ -14,12 +14,12 @@ public class Permission {
 
 	public Permission(int pPermissionID) {
 		permissionID = pPermissionID;
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		ResultSet resultSet;
 		try {
 			resultSet = con.createStatement()
-					.executeQuery("select permission from `" + TeachingIt.getInstance().getConnection().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+					.executeQuery("select permission from `" + TeachingIt.getInstance().getConnector().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "permissions` WHERE id='" + pPermissionID + "' LIMIT 1");
 			if (resultSet.next()) {
 				permissionName = resultSet.getString("permission");
@@ -30,17 +30,17 @@ public class Permission {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
 
 	public Permission(String pPermissionName) {
 		permissionName = pPermissionName.toLowerCase();
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		ResultSet resultSet;
 		try {
 			PreparedStatement prepStmt = con
-					.prepareStatement("select id from `" + TeachingIt.getInstance().getConnection().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+					.prepareStatement("select id from `" + TeachingIt.getInstance().getConnector().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "permissions` WHERE permission=? LIMIT 1");
 			prepStmt.setString(1, permissionName);
 			resultSet = prepStmt.executeQuery();
@@ -52,16 +52,16 @@ public class Permission {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
 
 	public static boolean permissionExists(String pPermissionName) {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		ResultSet resultSet;
 		try {
 			PreparedStatement prepStmt = con
-					.prepareStatement("select id from `" + TeachingIt.getInstance().getConnection().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+					.prepareStatement("select id from `" + TeachingIt.getInstance().getConnector().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "permissions` WHERE permission=? LIMIT 1");
 			prepStmt.setString(1, pPermissionName.toLowerCase());
 			resultSet = prepStmt.executeQuery();
@@ -73,17 +73,17 @@ public class Permission {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return false;
 	}
 
 	public static boolean permissionExists(int pPermissionID) {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		ResultSet resultSet;
 		try {
 			resultSet = con.createStatement()
-					.executeQuery("select permission from `" + TeachingIt.getInstance().getConnection().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+					.executeQuery("select permission from `" + TeachingIt.getInstance().getConnector().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "permissions` WHERE id='" + pPermissionID + "' LIMIT 1");
 			if (resultSet.next()) {
 				return true;
@@ -93,7 +93,7 @@ public class Permission {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return false;
 	}
 
@@ -111,11 +111,11 @@ public class Permission {
 			throw new IllegalArgumentException();
 		Permission perm = new Permission(pPermission);
 		if (perm.getPermissionID() == -1) {
-			Connection con = TeachingIt.getInstance().getConnection().createConnection();
+			Connection con = TeachingIt.getInstance().getConnector().createConnection();
 			try {
 				PreparedStatement preparedStatement = con
-						.prepareStatement("insert into  `" + TeachingIt.getInstance().getConnection().getDatabase()
-								+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+						.prepareStatement("insert into  `" + TeachingIt.getInstance().getConnector().getDatabase()
+								+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 								+ "users` values (?, ?, ?, ?, ?, ?)");
 				preparedStatement.setNull(1, 1);
 				preparedStatement.setString(2, pPermission);
@@ -123,7 +123,7 @@ public class Permission {
 			} catch (SQLException e) {
 				TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			}
-			TeachingIt.getInstance().getConnection().closeConnection(con);
+			TeachingIt.getInstance().getConnector().closeConnection(con);
 			perm = new Permission(pPermission);
 		}
 		return perm;

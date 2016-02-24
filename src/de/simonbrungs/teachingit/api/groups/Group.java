@@ -22,13 +22,13 @@ public class Group {
 	}
 
 	public Group getSuperGroup() {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		ResultSet resultSet;
 		int superGroupID = -1;
 		try {
 			resultSet = con.createStatement()
-					.executeQuery("select supergroup from `" + TeachingIt.getInstance().getConnection().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix() + "groups` WHERE id='"
+					.executeQuery("select supergroup from `" + TeachingIt.getInstance().getConnector().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` WHERE id='"
 							+ groupID + "' LIMIT 1");
 			if (resultSet.next()) {
 				superGroupID = resultSet.getInt("supergroup");
@@ -36,19 +36,19 @@ public class Group {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		if (superGroupID != -1)
 			return TeachingIt.getInstance().getGroupManager().getGroup(superGroupID);
 		return null;
 	}
 
 	public String getGroupName() {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		String groupName = null;
 		try {
 			ResultSet resultSet = con.createStatement()
-					.executeQuery("select groupname from `" + TeachingIt.getInstance().getConnection().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix() + "groups` WHERE id='"
+					.executeQuery("select groupname from `" + TeachingIt.getInstance().getConnector().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` WHERE id='"
 							+ groupID + "' LIMIT 1");
 			if (resultSet.next()) {
 				groupName = resultSet.getString("groupname");
@@ -56,25 +56,25 @@ public class Group {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return groupName;
 	}
 
 	public void setGroupName(String pNewGroupName) throws IllegalArgumentException {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		if (pNewGroupName.length() > 128)
 			throw new IllegalArgumentException();
 		try {
 			PreparedStatement preparedStatement = con
-					.prepareStatement("UPDATE `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnection().getTablePrefix()
+					.prepareStatement("UPDATE `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "groups` set groupname= ? WHERE ID='" + groupID + "' LIMIT 1");
 			preparedStatement.setString(1, pNewGroupName);
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
 
 	public boolean hasPermission(String pPermission) {
@@ -93,12 +93,12 @@ public class Group {
 	}
 
 	public int getPermissionHeight() {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		int permissionHeight = -1;
 		try {
 			ResultSet resultSet = con.createStatement().executeQuery(
-					"select permissionheight from `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "groups` WHERE id='" + groupID
+					"select permissionheight from `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` WHERE id='" + groupID
 							+ "' LIMIT 1");
 			if (resultSet.next()) {
 				permissionHeight = resultSet.getInt("permissionheight");
@@ -106,7 +106,7 @@ public class Group {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return permissionHeight;
 	}
 
@@ -114,46 +114,46 @@ public class Group {
 		Permission perm = Permission.createPermission(pPermission);
 		if (hasPermission(perm))
 			return false;
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		PreparedStatement preparedStatement;
 		try {
 			preparedStatement = con
-					.prepareStatement("insert into  `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "users` values (?, ?)");
+					.prepareStatement("insert into  `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "users` values (?, ?)");
 			preparedStatement.setInt(1, groupID);
 			preparedStatement.setInt(2, perm.getPermissionID());
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return true;
 	}
 
 	private ArrayList<Permission> getPermissions() {
 		ArrayList<Permission> permissions = new ArrayList<>();
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		try {
 			ResultSet resultSet = con.createStatement()
-					.executeQuery("select permissionid from `" + TeachingIt.getInstance().getConnection().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+					.executeQuery("select permissionid from `" + TeachingIt.getInstance().getConnector().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "grouppermissions` WHERE groupid='" + groupID + "'");
 			while (resultSet.next())
 				permissions.add(new Permission(resultSet.getInt("permissionid")));
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return permissions;
 	}
 
 	public ArrayList<Account> getUsersInGroup() {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		ArrayList<Account> accounts = new ArrayList<>();
 		try {
 			ResultSet resultSet = con.createStatement()
-					.executeQuery("select userid from `" + TeachingIt.getInstance().getConnection().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+					.executeQuery("select userid from `" + TeachingIt.getInstance().getConnector().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "users` WHERE groupid='" + groupID + "' LIMIT 1");
 			while (resultSet.next()) {
 				accounts.add(new Account(resultSet.getInt("userid")));
@@ -170,23 +170,23 @@ public class Group {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			return null;
 		} finally {
-			TeachingIt.getInstance().getConnection().closeConnection(con);
+			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
 		return accounts;
 	}
 
 	public void setPermissionHeight(int pPermissionHeight) {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		try {
 			PreparedStatement preparedStatement = con.prepareStatement("UPDATE `"
-					+ TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-					+ TeachingIt.getInstance().getConnection().getTablePrefix() + "groups` set permissionheight='"
+					+ TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+					+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` set permissionheight='"
 					+ pPermissionHeight + "' WHERE id='" + groupID + "' LIMIT 1");
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
 
 	public boolean isSuperGroup(Group pSuperGroup) {
@@ -204,29 +204,29 @@ public class Group {
 
 	public void removePermission(Permission pPermission) {
 		if (pPermission.getPermissionID() == -1) {
-			Connection con = TeachingIt.getInstance().getConnection().createConnection();
+			Connection con = TeachingIt.getInstance().getConnector().createConnection();
 			PreparedStatement preparedStatement;
 			try {
 				preparedStatement = con
-						.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnection().getDatabase()
-								+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+						.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnector().getDatabase()
+								+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 								+ "grouppermissions` WHERE groupid = '" + groupID + "' AND permissionid = '"
 								+ pPermission.getPermissionID() + "' LIMIT 1");
 				preparedStatement.execute();
 				ResultSet resultSet = con.createStatement().executeQuery("select permissionid from `"
-						+ TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-						+ TeachingIt.getInstance().getConnection().getTablePrefix() + "grouppermissions` LIMIT 1");
+						+ TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+						+ TeachingIt.getInstance().getConnector().getTablePrefix() + "grouppermissions` LIMIT 1");
 				if (resultSet.next())
 					return;
 				preparedStatement = con
-						.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnection().getDatabase()
-								+ "`.`" + TeachingIt.getInstance().getConnection().getTablePrefix()
+						.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnector().getDatabase()
+								+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 								+ "permissions` WHERE id = '" + pPermission.getPermissionID() + "' LIMIT 1");
 				preparedStatement.execute();
 			} catch (SQLException e) {
 				TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			} finally {
-				TeachingIt.getInstance().getConnection().closeConnection(con);
+				TeachingIt.getInstance().getConnector().closeConnection(con);
 			}
 		}
 	}

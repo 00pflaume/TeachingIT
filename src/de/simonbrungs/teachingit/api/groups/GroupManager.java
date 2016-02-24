@@ -17,11 +17,11 @@ public class GroupManager {
 		Group group = getGroup(pGroupName);
 		if (group != null)
 			return group;
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		try {
 			PreparedStatement preparedStatement = con.prepareStatement("insert into  `"
-					+ TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-					+ TeachingIt.getInstance().getConnection().getTablePrefix() + "groups` values (?, ?, ?, ?)");
+					+ TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+					+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` values (?, ?, ?, ?)");
 			preparedStatement.setString(1, pGroupName);
 			preparedStatement.setNull(2, 2);
 			preparedStatement.setInt(3, pSupergroup);
@@ -30,23 +30,23 @@ public class GroupManager {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return getGroup(pGroupName);
 	}
 
 	public void removeGroup(int pGroupID) {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		PreparedStatement preparedStatement;
 		try {
 			preparedStatement = con
-					.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "groups` WHERE id = '"
+					.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` WHERE id = '"
 							+ pGroupID + "' LIMIT 1");
 			preparedStatement.execute();
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
 
 	public void removeGroup(String pGroupName) {
@@ -58,13 +58,13 @@ public class GroupManager {
 	}
 
 	public Group getGroup(int pGroupID) {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		ResultSet resultSet;
 		int groupID = -1;
 		try {
 			resultSet = con.createStatement()
-					.executeQuery("select id from `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "groups` WHERE id = '"
+					.executeQuery("select id from `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` WHERE id = '"
 							+ pGroupID + "'");
 			if (resultSet.next()) {
 				groupID = resultSet.getInt("id");
@@ -72,19 +72,19 @@ public class GroupManager {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		if (groupID == -1)
 			return null;
 		return new Group(groupID);
 	}
 
 	public Group getGroup(String pGroupName) {
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		int groupID = -1;
 		try {
 			PreparedStatement prepStmt = con.prepareStatement("select id from `"
-					+ TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-					+ TeachingIt.getInstance().getConnection().getTablePrefix() + "groups` WHERE groupname = ?");
+					+ TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+					+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` WHERE groupname = ?");
 			prepStmt.setString(1, pGroupName);
 			ResultSet resultSet = prepStmt.getResultSet();
 			if (resultSet.next()) {
@@ -93,7 +93,7 @@ public class GroupManager {
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		if (groupID == -1)
 			return null;
 		return new Group(groupID);
@@ -101,19 +101,19 @@ public class GroupManager {
 
 	public ArrayList<Group> getGroups() {
 		ArrayList<Group> groups = new ArrayList<>();
-		Connection con = TeachingIt.getInstance().getConnection().createConnection();
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		ResultSet resultSet;
 		try {
 			resultSet = con.createStatement()
-					.executeQuery("select id from `" + TeachingIt.getInstance().getConnection().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnection().getTablePrefix() + "groups`");
+					.executeQuery("select id from `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups`");
 			while (resultSet.next()) {
 				groups.add(new Group(resultSet.getInt("id")));
 			}
 		} catch (SQLException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
-		TeachingIt.getInstance().getConnection().closeConnection(con);
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return groups;
 	}
 }

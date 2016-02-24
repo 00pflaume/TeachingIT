@@ -1,4 +1,4 @@
-package de.simonbrungs.teachingit.connection;
+package de.simonbrungs.teachingit.connector;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,7 +8,7 @@ import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 
-public class MySQLConnection {
+public class MySQLConnector {
 	private String user;
 	private String password;
 	private int port;
@@ -16,7 +16,7 @@ public class MySQLConnection {
 	private String tablePrefix;
 	private String host;
 
-	public MySQLConnection(String pUser, String pPassword, int pPort, String pHost, String ptablePrefix,
+	public MySQLConnector(String pUser, String pPassword, int pPort, String pHost, String ptablePrefix,
 			String pDatabase) {
 		user = pUser;
 		password = pPassword;
