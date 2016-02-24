@@ -19,7 +19,7 @@ import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
 
 public class PluginManager {
 	private ArrayList<Plugin> plugins = new ArrayList<>();
-	private String pluginManagerPrefix = "[PluginManager] ";
+	private static final String PLUGINMANAGERPREFIX = "[PluginManager] ";
 	private Theme theme = null;
 
 	public Theme getTheme() {
@@ -33,30 +33,33 @@ public class PluginManager {
 		if (propertieFile == null)
 			return false;
 		if (!checkPropertieFile(propertieFile)) {
-			System.out.println(pluginManagerPrefix + "The Theme propertie file of " + pThemeJar.getName()
-					+ " is not correct. Needed information are missing");
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, PLUGINMANAGERPREFIX + "The Theme propertie file of "
+					+ pThemeJar.getName() + " is not correct. Needed information are missing");
 			return false;
 		}
 		try {
 			Theme theme = null;
 			theme = (Theme) loadPlugin(pThemeJar, propertieFile, Theme.class);
 			if (theme != null) {
-				System.out.println(pluginManagerPrefix + "The Theme " + propertieFile.getProperty("name") + " (version "
-						+ propertieFile.getProperty("version") + ") from " + propertieFile.getProperty("author")
-						+ " was successfully loaded.");
+				TeachingIt.getInstance().getLogger().log(Level.INFO,
+						PLUGINMANAGERPREFIX + "The Theme " + propertieFile.getProperty("name") + " (version "
+								+ propertieFile.getProperty("version") + ") from " + propertieFile.getProperty("author")
+								+ " was successfully loaded.");
 				this.theme = theme;
 				return true;
 			} else {
-				System.out.println(pluginManagerPrefix
-						+ "The plugin could not be loaded. The given main class of the plugin does not "
-						+ " extend the class \"Theme\".");
+				TeachingIt.getInstance().getLogger().log(Level.WARNING,
+						PLUGINMANAGERPREFIX
+								+ "The plugin could not be loaded. The given main class of the plugin does not "
+								+ " extend the class \"Theme\".");
 			}
 		} catch (ClassNotFoundException e) {
-			System.out.println(pluginManagerPrefix + "The given plugin \"" + propertieFile.getProperty("main")
-					+ "\" class could not be found.");
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, PLUGINMANAGERPREFIX + "The given main class \""
+					+ propertieFile.getProperty("main") + "\" could not be found.");
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
-			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
+			TeachingIt.getInstance().getLogger().log(Level.WARNING,
+					PLUGINMANAGERPREFIX + "An error occurred while loading the theme \"" + pThemeJar.getName() + "\".");
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		} catch (SecurityException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
@@ -95,7 +98,8 @@ public class PluginManager {
 					loader.close();
 				}
 			} catch (IOException e) {
-				System.out.println(pluginManagerPrefix + "URLClassLoader could not be closed.");
+				TeachingIt.getInstance().getLogger().log(Level.WARNING,
+						PLUGINMANAGERPREFIX + "URLClassLoader could not be closed.");
 				TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 			}
 		}
@@ -107,28 +111,32 @@ public class PluginManager {
 		if (propertieFile == null)
 			return;
 		if (!checkPropertieFile(propertieFile)) {
-			System.out.println(pluginManagerPrefix + "The plugin propertie file of " + pPluginJar.getName()
-					+ " is not correct. Needed information are missing");
+			TeachingIt.getInstance().getLogger().log(Level.WARNING,
+					PLUGINMANAGERPREFIX + "The plugin propertie file of " + pPluginJar.getName()
+							+ " is not correct. Needed information are missing");
 			return;
 		}
 		try {
 			Plugin pluginInstance = null;
 			pluginInstance = (Plugin) loadPlugin(pPluginJar, propertieFile, Plugin.class);
 			if (pluginInstance != null) {
-				System.out.println(pluginManagerPrefix + "The plugin " + propertieFile.getProperty("name")
-						+ " (version " + propertieFile.getProperty("version") + ") from "
-						+ propertieFile.getProperty("author") + " was successfully enabled.");
+				TeachingIt.getInstance().getLogger().log(Level.WARNING,
+						PLUGINMANAGERPREFIX + "The plugin " + propertieFile.getProperty("name") + " (version "
+								+ propertieFile.getProperty("version") + ") from " + propertieFile.getProperty("author")
+								+ " was successfully enabled.");
 				plugins.add(pluginInstance);
 			} else {
-				System.out.println(pluginManagerPrefix + "Error while loading Plugin.");
+				TeachingIt.getInstance().getLogger().log(Level.WARNING,
+						PLUGINMANAGERPREFIX + "Error while loading plugin \"" + pPluginJar.getName() + "\".");
 			}
 		} catch (ClassNotFoundException e) {
-			System.out.println(pluginManagerPrefix + "The given plugin \"" + propertieFile.getProperty("main")
-					+ "\" class could not be found.");
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, PLUGINMANAGERPREFIX + "The given plugin \""
+					+ propertieFile.getProperty("main") + "\" class could not be found.");
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException | SecurityException
 				| IllegalArgumentException e) {
-			System.out.println(pluginManagerPrefix + "An error occurred while loading a plugin.");
+			TeachingIt.getInstance().getLogger().log(Level.WARNING,
+					PLUGINMANAGERPREFIX + "An error occurred while loading a plugin.");
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 	}
@@ -144,7 +152,8 @@ public class PluginManager {
 			zipFile = new ZipFile(pPluginJar.getAbsolutePath());
 			ZipEntry propertieFileEntry = zipFile.getEntry("properties/plugin.properties");
 			if (propertieFileEntry == null) {
-				System.out.println(pluginManagerPrefix + "Propertie file missing in " + pPluginJar.getName() + ".");
+				TeachingIt.getInstance().getLogger().log(Level.WARNING,
+						PLUGINMANAGERPREFIX + "Propertie file missing in " + pPluginJar.getName() + ".");
 				return null;
 			}
 			InputStream stream = zipFile.getInputStream(propertieFileEntry);

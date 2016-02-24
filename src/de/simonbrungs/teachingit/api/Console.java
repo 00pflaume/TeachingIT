@@ -3,12 +3,14 @@ package de.simonbrungs.teachingit.api;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.utilities.StringToArrayList;
 
 public class Console {
 	private HashMap<String, Command> registerdCommands = new HashMap<>();
+	private final static String PREFIX = "[CONSOLE] ";
 
 	public void registerCommand(Command pCommand, String pCommandName) {
 		registerdCommands.put(pCommandName.toLowerCase(), pCommand);
@@ -26,7 +28,7 @@ public class Console {
 					commandWithArgs.remove(0);
 					command.executeCommand(commandName, commandWithArgs);
 				} else {
-					System.out.println("The command was not found");
+					TeachingIt.getInstance().getLogger().log(Level.INFO, PREFIX + "The command was not found");
 				}
 			}
 		}
