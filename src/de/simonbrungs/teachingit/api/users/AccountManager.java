@@ -1,5 +1,7 @@
 package de.simonbrungs.teachingit.api.users;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -90,7 +92,7 @@ public class AccountManager {
 				return null;
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -132,7 +134,7 @@ public class AccountManager {
 				return null;
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -152,7 +154,8 @@ public class AccountManager {
 				return null;
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -186,7 +189,7 @@ public class AccountManager {
 			TeachingIt.getInstance().getEventExecuter().executeEvent(new AfterAccountCreationEvent(account));
 			return account;
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -218,7 +221,7 @@ public class AccountManager {
 			preparedStatement.executeUpdate();
 			return true;
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return false;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -240,7 +243,7 @@ public class AccountManager {
 			}
 			return sb.toString();
 		} catch (NoSuchAlgorithmException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		return null;
 	}

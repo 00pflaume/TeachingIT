@@ -1,5 +1,7 @@
 package de.simonbrungs.teachingit.connectors;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -58,7 +60,9 @@ public class MySQLConnector {
 					+ " `userid` INT NOT NULL ," + " `metavalue` INT NOT NULL )");
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		closeConnection(con);
 	}
@@ -82,11 +86,15 @@ public class MySQLConnector {
 			con = DriverManager.getConnection(
 					"jdbc:mysql://" + host + ":" + port + "/?user=" + user + "&password=" + password + add);
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} catch (ClassNotFoundException e1) {
 			System.out.println(TeachingIt.getInstance().PREFIX + "Fatal Error the system is now going to hold.");
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e1.getMessage());
+			StringWriter sw = new StringWriter();
+			e1.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			TeachingIt.getInstance().shutDown(1);
 			return null;
 		}

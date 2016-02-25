@@ -1,5 +1,7 @@
 package de.simonbrungs.teachingit.api.groups;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,7 +40,8 @@ public class GroupManager {
 			preparedStatement.setInt(4, pPermissionheight);
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return getGroup(pGroupName);
@@ -54,7 +57,7 @@ public class GroupManager {
 							+ pGroupID + "' LIMIT 1");
 			preparedStatement.execute();
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
@@ -80,7 +83,7 @@ public class GroupManager {
 				groupID = resultSet.getInt("id");
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		if (groupID == -1)
@@ -101,7 +104,7 @@ public class GroupManager {
 				groupID = resultSet.getInt("id");
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		if (groupID == -1)
@@ -121,7 +124,7 @@ public class GroupManager {
 				groups.add(new Group(resultSet.getInt("id")));
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return groups;

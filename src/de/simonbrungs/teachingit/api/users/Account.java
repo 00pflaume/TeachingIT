@@ -1,5 +1,7 @@
 package de.simonbrungs.teachingit.api.users;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,7 +29,8 @@ public class Account {
 				return resultSet.getString("user");
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
@@ -49,7 +52,7 @@ public class Account {
 				return resultSet.getString("email");
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
@@ -67,7 +70,7 @@ public class Account {
 				return resultSet.getString("email");
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
@@ -99,7 +102,7 @@ public class Account {
 				return resultSet.getByte("activated") == 1;
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
@@ -117,7 +120,7 @@ public class Account {
 				return new Group(resultSet.getInt("groupid"));
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
@@ -139,7 +142,7 @@ public class Account {
 				return resultSet.getString("email");
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
@@ -158,7 +161,7 @@ public class Account {
 			preparedStatement.setInt(1, id);
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
@@ -179,7 +182,7 @@ public class Account {
 				return resultSet.getLong("regestrationdate");
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
@@ -200,7 +203,7 @@ public class Account {
 							+ id + "' LIMIT 1");
 			preparedStatement.execute();
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
@@ -217,7 +220,7 @@ public class Account {
 			preparedStatement.setInt(2, group.getGroupID());
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}

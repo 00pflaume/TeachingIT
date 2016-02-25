@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -114,7 +115,9 @@ public class Webserver {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 
 	}

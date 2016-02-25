@@ -1,5 +1,7 @@
 package de.simonbrungs.teachingit.api.groups;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,7 +30,9 @@ public class Permission {
 				permissionID = -1;
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
@@ -39,8 +43,8 @@ public class Permission {
 		ResultSet resultSet;
 		try {
 			PreparedStatement prepStmt = con
-					.prepareStatement("select id from `" + TeachingIt.getInstance().getConnector().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
+					.prepareStatement("select id from `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "permissions` WHERE permission=? LIMIT 1");
 			prepStmt.setString(1, permissionName);
 			resultSet = prepStmt.executeQuery();
@@ -50,7 +54,9 @@ public class Permission {
 				permissionID = -1;
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
@@ -60,8 +66,8 @@ public class Permission {
 		ResultSet resultSet;
 		try {
 			PreparedStatement prepStmt = con
-					.prepareStatement("select id from `" + TeachingIt.getInstance().getConnector().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
+					.prepareStatement("select id from `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "permissions` WHERE permission=? LIMIT 1");
 			prepStmt.setString(1, pPermissionName.toLowerCase());
 			resultSet = prepStmt.executeQuery();
@@ -71,7 +77,9 @@ public class Permission {
 				return false;
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return false;
@@ -91,7 +99,9 @@ public class Permission {
 				return false;
 			}
 		} catch (SQLException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return false;
@@ -121,7 +131,9 @@ public class Permission {
 				preparedStatement.setString(2, pPermission);
 				preparedStatement.executeQuery();
 			} catch (SQLException e) {
-				TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+				StringWriter sw = new StringWriter();
+				e.printStackTrace(new PrintWriter(sw));
+				TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			}
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 			perm = new Permission(pPermission);

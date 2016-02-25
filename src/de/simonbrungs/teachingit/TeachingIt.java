@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Properties;
 import java.util.logging.FileHandler;
@@ -88,11 +90,22 @@ public class TeachingIt {
 			logger.addHandler(fh);
 		} catch (SecurityException | IOException e) {
 			System.out.println(PREFIX + "Fatal Error!");
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			shutDown(1);
 		}
 		getLogger().log(Level.INFO, PREFIX + "Server is starting");
 		if (createConfig()) {
+			File folder = new File("plugins");
+			if (!folder.exists()) {
+				folder.mkdirs();
+			}
+			folder = new File("theme");
+			if (!folder.exists()) {
+				folder.mkdirs();
+			}
 			getLogger().log(Level.WARNING,
 					PREFIX + "The Config was created. Please input your data into the config file.");
 			return;
@@ -173,7 +186,10 @@ public class TeachingIt {
 				return false;
 			}
 		} catch (ThemeAlreadyRegisterdException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		return true;
 	}
@@ -193,7 +209,10 @@ public class TeachingIt {
 			getPluginManager().unregisterAllPlugins();
 			getLogger().log(Level.INFO, PREFIX + "GoodBye");
 		} catch (Throwable e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			getLogger().log(Level.WARNING, PREFIX + "Error while shuttingdown");
 		} finally {
 			Runtime.getRuntime().exit(pExitState);
@@ -245,7 +264,7 @@ public class TeachingIt {
 				prop.setProperty("MySQLPassword", "password");
 				prop.setProperty("MySQLDatabase", "TeachingIt");
 				prop.setProperty("MySQLTablePrefix", "TIt_");
-				prop.setProperty("MySQLUseSSL", "true");
+				prop.setProperty("MySQLUseSSL", "false");
 				prop.store(output, null);
 				return true;
 			}
@@ -258,7 +277,10 @@ public class TeachingIt {
 				try {
 					output.close();
 				} catch (IOException e) {
-					TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+					StringWriter sw = new StringWriter();
+					e.printStackTrace(new PrintWriter(sw));
+
+					TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 				}
 			}
 		}
@@ -283,7 +305,10 @@ public class TeachingIt {
 				try {
 					input.close();
 				} catch (IOException e) {
-					TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+					StringWriter sw = new StringWriter();
+					e.printStackTrace(new PrintWriter(sw));
+
+					TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 				}
 			}
 		}

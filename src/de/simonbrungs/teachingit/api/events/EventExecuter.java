@@ -1,5 +1,7 @@
 package de.simonbrungs.teachingit.api.events;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
@@ -53,7 +55,7 @@ public class EventExecuter {
 				try {
 					listenerEntry.getExecutiveListener().executeEvent(pEvent);
 				} catch (Exception e) {
-					TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
+					StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 				}
 				if (pEvent.isCanceld()) {
 					return;
