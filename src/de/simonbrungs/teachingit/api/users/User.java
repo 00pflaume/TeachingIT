@@ -1,19 +1,18 @@
 package de.simonbrungs.teachingit.api.users;
 
-import java.net.SocketAddress;
 import java.util.HashMap;
 
 public class User {
 	private Account account;
 	private String path;
-	private SocketAddress socketAddress;
+	private String ipAddress;
 	private HashMap<String, Object> postRequests;
 	private HashMap<String, String> userVars = new HashMap<>();
 
-	public User(String pPath, Account pAccount, SocketAddress pSocketAddress, HashMap<String, Object> pPostRequests) {
+	public User(String pPath, Account pAccount, String pIPAddress, HashMap<String, Object> pPostRequests) {
 		path = pPath;
 		account = pAccount;
-		socketAddress = pSocketAddress;
+		ipAddress = pIPAddress;
 		postRequests = pPostRequests;
 	}
 
@@ -23,6 +22,11 @@ public class User {
 
 	/**
 	 * As soon as the site is builded up this is getting deleted
+	 * 
+	 * @param pKey
+	 *            The key for the value
+	 * @param pValue
+	 *            The value that should be set
 	 */
 	public void setUserVar(String pKey, String pValue) {
 		userVars.put(pKey, pValue);
@@ -48,8 +52,8 @@ public class User {
 		return null;
 	}
 
-	public SocketAddress getSocketAddress() {
-		return socketAddress;
+	public String getIPAddress() {
+		return ipAddress;
 	}
 
 	public String getCalledPath() {

@@ -1,4 +1,4 @@
-package de.simonbrungs.teachingit.connector;
+package de.simonbrungs.teachingit.connectors;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

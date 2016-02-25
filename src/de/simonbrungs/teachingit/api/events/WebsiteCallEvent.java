@@ -12,7 +12,7 @@ public class WebsiteCallEvent extends Event {
 
 	@Override
 	public String getEventName() {
-		return "HttpExchangeEvent";
+		return "WebsiteCallEvent";
 	}
 
 	@Override

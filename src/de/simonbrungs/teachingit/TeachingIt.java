@@ -20,7 +20,7 @@ import de.simonbrungs.teachingit.api.groups.GroupManager;
 import de.simonbrungs.teachingit.api.plugin.PluginManager;
 import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.commands.ShutDown;
-import de.simonbrungs.teachingit.connector.MySQLConnector;
+import de.simonbrungs.teachingit.connectors.MySQLConnector;
 import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
 import de.simonbrungs.teachingit.webserver.Webserver;
 

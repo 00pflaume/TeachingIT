@@ -25,6 +25,7 @@ import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.events.ContentCreateEvent;
 import de.simonbrungs.teachingit.api.events.HeaderCreateEvent;
 import de.simonbrungs.teachingit.api.events.WebsiteCallEvent;
+import de.simonbrungs.teachingit.api.users.Account;
 import de.simonbrungs.teachingit.api.users.User;
 
 public class Webserver {
@@ -36,13 +37,13 @@ public class Webserver {
 	public Webserver(String pAdress, int pPort) {
 		webserverThread = new Thread(new Runnable() {
 			public void run() {
-				starWebserver(pPort);
+				runWebserver(pPort);
 			}
 		});
 		webserverThread.start();
 	}
 
-	public void starWebserver(int pPort) {
+	private void runWebserver(int pPort) {
 		try {
 			try (ServerSocket serverSocket = new ServerSocket(pPort)) {
 				while (!shouldStop)
@@ -58,7 +59,11 @@ public class Webserver {
 						String path = getPath(inputstring);
 						TeachingIt.getInstance().getLogger().log(Level.INFO,
 								PREFIX + "Request from " + socket.getInetAddress() + " to path " + path);
-						User user = new User(path, null, socket.getRemoteSocketAddress(), postRequests);
+						Account account = TeachingIt.getInstance().getAccountManager()
+								.loginUser((String) TeachingIt.getInstance().getAccountManager()
+										.getSessionKey("username"),
+								(String) TeachingIt.getInstance().getAccountManager().getSessionKey("password"));
+						User user = new User(path, account, socket.getRemoteSocketAddress().toString(), postRequests);
 						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(user);
 						TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
 						if (!websiteCallEvent.isCanceld()) {
@@ -76,7 +81,7 @@ public class Webserver {
 								writer.println(response);
 							} else {
 								String response = "<html><head>";
-								HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent();
+								HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent(user);
 								TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
 								if (headerCreateEvent.getHeader() != null) {
 									response += headerCreateEvent.getHeader();
@@ -108,6 +113,7 @@ public class Webserver {
 					}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, e.getMessage());
 		}
 

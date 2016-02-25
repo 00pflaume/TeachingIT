@@ -6,6 +6,16 @@ import java.util.logging.Level;
 import de.simonbrungs.teachingit.TeachingIt;
 
 public class EventExecuter {
+	private static EventExecuter eventExecuter;
+
+	public EventExecuter() {
+		eventExecuter = this;
+	}
+
+	public static EventExecuter getInstance() {
+		return eventExecuter;
+	}
+
 	ArrayList<ListenerEntry> registerdEvents = new ArrayList<>();
 
 	public void registerListener(Listener<?> pListener, Class<?> pClass, int pPriority) {

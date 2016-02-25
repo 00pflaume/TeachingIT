@@ -10,6 +10,16 @@ import java.util.logging.Level;
 import de.simonbrungs.teachingit.TeachingIt;
 
 public class GroupManager {
+	private static GroupManager groupManager;
+
+	public GroupManager() {
+		groupManager = this;
+	}
+
+	public static GroupManager getInstance() {
+		return groupManager;
+	}
+
 	public Group createGroup(String pGroupName, int pSupergroup, int pPermissionheight)
 			throws IllegalArgumentException {
 		if (pGroupName.length() > 128)
@@ -19,9 +29,9 @@ public class GroupManager {
 			return group;
 		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		try {
-			PreparedStatement preparedStatement = con.prepareStatement("insert into  `"
-					+ TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-					+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` values (?, ?, ?, ?)");
+			PreparedStatement preparedStatement = con
+					.prepareStatement("insert into  `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` values (?, ?, ?, ?)");
 			preparedStatement.setString(1, pGroupName);
 			preparedStatement.setNull(2, 2);
 			preparedStatement.setInt(3, pSupergroup);
@@ -82,9 +92,9 @@ public class GroupManager {
 		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		int groupID = -1;
 		try {
-			PreparedStatement prepStmt = con.prepareStatement("select id from `"
-					+ TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-					+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` WHERE groupname = ?");
+			PreparedStatement prepStmt = con
+					.prepareStatement("select id from `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` WHERE groupname = ?");
 			prepStmt.setString(1, pGroupName);
 			ResultSet resultSet = prepStmt.getResultSet();
 			if (resultSet.next()) {

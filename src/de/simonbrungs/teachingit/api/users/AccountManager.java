@@ -6,15 +6,70 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.events.AccountDeleteEvent;
 import de.simonbrungs.teachingit.api.events.AfterAccountCreationEvent;
 import de.simonbrungs.teachingit.api.events.PreAccountCreationEvent;
+import de.simonbrungs.teachingit.utilities.DelayedTask;
+import de.simonbrungs.teachingit.utilities.RepeatingTask;
 
 public class AccountManager {
-	public Account loginUser(String pUsername, String pPassword) {
+	private HashMap<String, SessionKey> sessionKeys = new HashMap<>();
+	private static AccountManager accountmanager;
+
+	private class SessionKey {
+		private long creationTime;
+		private Object content;
+
+		public SessionKey(Object pContent) {
+			content = pContent;
+			creationTime = System.currentTimeMillis() / 1000;
+		}
+
+		public Object getContent() {
+			return content;
+		}
+
+		public long getCreationTime() {
+			return creationTime;
+		}
+	}
+
+	public AccountManager() {
+		accountmanager = this;
+		new RepeatingTask(86400000) {
+			@Override
+			public void run() {
+				clear();
+			}
+		};
+	}
+
+	public static AccountManager getInstance() {
+		return accountmanager;
+	}
+
+	public void clear() {
+		ArrayList<String> toRemove = new ArrayList<>();
+		Set<Entry<String, SessionKey>> entrys = sessionKeys.entrySet();
+		for (Entry<String, SessionKey> entry : entrys) {
+			if (entry.getValue().getCreationTime() < (System.currentTimeMillis() / 1000 - 86400)) {
+				toRemove.add(entry.getKey());
+			}
+		}
+		for (String key : toRemove)
+			sessionKeys.remove(key);
+	}
+
+	public Account loginUser(String pUsername, String pEncryptPassword) {
+		if (pUsername == null || pEncryptPassword == null)
+			return null;
 		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		try {
 			PreparedStatement prepStmt = con.prepareStatement(
@@ -22,7 +77,7 @@ public class AccountManager {
 							+ TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "users` WHERE user= ? AND password= ? LIMIT 1");
 			prepStmt.setString(1, pUsername);
-			prepStmt.setString(2, encryptPassword(pPassword));
+			prepStmt.setString(2, encryptPassword(pEncryptPassword));
 			ResultSet resultSet = prepStmt.executeQuery();
 			if (resultSet.next()) {
 				Account account = new Account(resultSet.getInt("id"));
@@ -40,6 +95,27 @@ public class AccountManager {
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
+	}
+
+	public Object getSessionKey(String pKey) {
+		SessionKey sessionKey = sessionKeys.get(pKey);
+		if (sessionKey == null)
+			return null;
+		return sessionKey.getContent();
+	}
+
+	public Object removeSessionKey(String pIPAddress, String pKey) {
+		return sessionKeys.remove(pIPAddress + pKey);
+	}
+
+	public void setSessionKey(String pIPAddress, String pKey, Object pValue) {
+		new DelayedTask(86400000) {
+			@Override
+			public void run() {
+				removeSessionKey(pIPAddress, pKey);
+			}
+		};
+		sessionKeys.put(pIPAddress + pKey, new SessionKey(pValue));
 	}
 
 	public Account getAccount(String pUsername) {
@@ -153,7 +229,7 @@ public class AccountManager {
 		removeAccount(getAccount(pUserName));
 	}
 
-	String encryptPassword(String pPassword) {
+	public String encryptPassword(String pPassword) {
 		MessageDigest mDigest;
 		try {
 			mDigest = MessageDigest.getInstance("SHA1");

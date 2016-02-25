@@ -1,12 +1,12 @@
 package de.simonbrungs.teachingit.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
-import de.simonbrungs.teachingit.utilities.StringToArrayList;
 
 public class Console {
 	private HashMap<String, Command> registerdCommands = new HashMap<>();
@@ -20,7 +20,7 @@ public class Console {
 		Scanner scanner = new Scanner(System.in);
 		while (!TeachingIt.getInstance().getShouldClose()) {
 			String scanned = scanner.nextLine();
-			ArrayList<String> commandWithArgs = StringToArrayList.stringToArrayList(scanned);
+			ArrayList<String> commandWithArgs = new ArrayList<String>(Arrays.asList(scanned.split(" ")));
 			if (!commandWithArgs.isEmpty()) {
 				Command command = registerdCommands.get(commandWithArgs.get(0).toLowerCase());
 				if (command != null) {
