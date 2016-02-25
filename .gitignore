@@ -8,7 +8,6 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 bin/
-build/
 .settings/
 dir.buildfile/
 # Windows Installer files
