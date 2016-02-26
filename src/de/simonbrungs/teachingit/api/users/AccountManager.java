@@ -12,14 +12,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.events.AccountDeleteEvent;
 import de.simonbrungs.teachingit.api.events.AfterAccountCreationEvent;
 import de.simonbrungs.teachingit.api.events.PreAccountCreationEvent;
-import de.simonbrungs.teachingit.utilities.DelayedTask;
-import de.simonbrungs.teachingit.utilities.RepeatingTask;
 
 public class AccountManager {
 	private HashMap<String, SessionKey> sessionKeys = new HashMap<>();
@@ -45,12 +45,12 @@ public class AccountManager {
 
 	public AccountManager() {
 		accountmanager = this;
-		new RepeatingTask(86400000) {
+		new Timer().scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
 				clear();
 			}
-		};
+		}, 86400000, 86400000);
 	}
 
 	public static AccountManager getInstance() {
@@ -92,7 +92,9 @@ public class AccountManager {
 				return null;
 			}
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -111,12 +113,12 @@ public class AccountManager {
 	}
 
 	public void setSessionKey(String pIPAddress, String pKey, Object pValue) {
-		new DelayedTask(86400000) {
+		new Timer().scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
 				removeSessionKey(pIPAddress, pKey);
 			}
-		};
+		}, 86400000, 86400000);
 		sessionKeys.put(pIPAddress + pKey, new SessionKey(pValue));
 	}
 
@@ -134,7 +136,9 @@ public class AccountManager {
 				return null;
 			}
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -155,7 +159,8 @@ public class AccountManager {
 			}
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
-			e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -189,7 +194,9 @@ public class AccountManager {
 			TeachingIt.getInstance().getEventExecuter().executeEvent(new AfterAccountCreationEvent(account));
 			return account;
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -221,7 +228,9 @@ public class AccountManager {
 			preparedStatement.executeUpdate();
 			return true;
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return false;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -243,7 +252,9 @@ public class AccountManager {
 			}
 			return sb.toString();
 		} catch (NoSuchAlgorithmException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		return null;
 	}

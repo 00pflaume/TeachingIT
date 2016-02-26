@@ -18,12 +18,14 @@ import java.util.logging.XMLFormatter;
 
 import de.simonbrungs.teachingit.api.Console;
 import de.simonbrungs.teachingit.api.events.EventExecuter;
+import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
 import de.simonbrungs.teachingit.api.groups.GroupManager;
 import de.simonbrungs.teachingit.api.plugin.PluginManager;
 import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.commands.ShutDown;
 import de.simonbrungs.teachingit.connectors.MySQLConnector;
 import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
+import de.simonbrungs.teachingit.protection.DosProtection;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
 public class TeachingIt {
@@ -111,20 +113,22 @@ public class TeachingIt {
 			return;
 		}
 		config = initConfig();
-		registerCommands();
+		logger.setLevel(Level.parse(config.getProperty("LogLevel")));
 		connector = new MySQLConnector(config.getProperty("MySQLUser"), config.getProperty("MySQLPassword"),
 				Integer.parseInt(config.getProperty("MySQLPort")), config.getProperty("MySQLHost"),
 				config.getProperty("MySQLTablePrefix"), config.getProperty("MySQLDatabase"));
 		eventExecuter = new EventExecuter();
 		groupManager = new GroupManager();
 		accountManager = new AccountManager();
+		registerCommands();
+		registerListeners();
 		getLogger().log(Level.INFO, PREFIX + "Now going to load plugins.");
 		loadPlugins();
 		getLogger().log(Level.INFO, PREFIX + "Plugins loaded.");
 		getLogger().log(Level.INFO, PREFIX + "Now going to load theme");
 		if (loadTheme()) {
 			getLogger().log(Level.INFO, PREFIX + "The server is started");
-			webserver = new Webserver(config.getProperty("WebServerPath"),
+			webserver = new Webserver(Long.parseLong(config.getProperty("MaxPOSTSizeInBytes")),
 					Integer.parseInt(config.getProperty("WebServerPort")));
 			registerIncludes();
 			console.commandsReader();
@@ -132,6 +136,10 @@ public class TeachingIt {
 			getLogger().log(Level.INFO, PREFIX + "The server is now going to hold.");
 			shutDown(0);
 		}
+	}
+
+	private void registerListeners() {
+		EventExecuter.getInstance().registerListener(new DosProtection(), SocketAcceptedEvent.class, -1);
 	}
 
 	private void registerIncludes() {
@@ -258,6 +266,8 @@ public class TeachingIt {
 				prop.setProperty("WebServerPath", "/");
 				prop.setProperty("WebServerPort", "80");
 				prop.setProperty("SiteName", "TeachingIt");
+				prop.setProperty("MaxPOSTSizeInBytes", "128000000");
+				prop.setProperty("LogLevel", "INFO");
 				prop.setProperty("MySQLHost", "localhost");
 				prop.setProperty("MySQLPort", "3306");
 				prop.setProperty("MySQLUser", "root");

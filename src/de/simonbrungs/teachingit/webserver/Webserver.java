@@ -24,7 +24,9 @@ import java.util.regex.Pattern;
 
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.events.ContentCreateEvent;
+import de.simonbrungs.teachingit.api.events.EventExecuter;
 import de.simonbrungs.teachingit.api.events.HeaderCreateEvent;
+import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
 import de.simonbrungs.teachingit.api.events.WebsiteCallEvent;
 import de.simonbrungs.teachingit.api.users.Account;
 import de.simonbrungs.teachingit.api.users.User;
@@ -35,86 +37,95 @@ public class Webserver {
 	private HashMap<String, File> registerdFiles = new HashMap<>();
 	public final String PREFIX = "[Webserver] ";
 
-	public Webserver(String pAdress, int pPort) {
+	public Webserver(long maxPOSTSize, int pPort) {
 		webserverThread = new Thread(new Runnable() {
 			public void run() {
-				runWebserver(pPort);
+				runWebserver(maxPOSTSize, pPort);
 			}
 		});
 		webserverThread.start();
 	}
 
-	private void runWebserver(int pPort) {
+	private void runWebserver(long pMaxPOSTSize, int pPort) {
 		try {
 			try (ServerSocket serverSocket = new ServerSocket(pPort)) {
-				while (!shouldStop)
+				while (!shouldStop) {
 					try (Socket socket = serverSocket.accept();
 							InputStream input = socket.getInputStream();
 							BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 							OutputStream output = socket.getOutputStream();
 							PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
-						Object[] collection = readPost(reader);
-						@SuppressWarnings("unchecked")
-						ArrayList<String> inputstring = (ArrayList<String>) collection[0];
-						HashMap<String, Object> postRequests = parseQuery((String) collection[1]);
-						String path = getPath(inputstring);
-						TeachingIt.getInstance().getLogger().log(Level.INFO,
-								PREFIX + "Request from " + socket.getInetAddress() + " to path " + path);
-						Account account = TeachingIt.getInstance().getAccountManager()
-								.loginUser((String) TeachingIt.getInstance().getAccountManager()
-										.getSessionKey("username"),
-								(String) TeachingIt.getInstance().getAccountManager().getSessionKey("password"));
-						User user = new User(path, account, socket.getRemoteSocketAddress().toString(), postRequests);
-						WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(user);
-						TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
-						if (!websiteCallEvent.isCanceld()) {
-							File file = registerdFiles.get(path);
-							if (file != null) {
-								List<String> lines = Files.readAllLines(Paths.get(path));
-								writer.println("HTTP/1.0 200 OK");
-								writer.println("Content-Type: text/html; charset=ISO-8859-1");
-								writer.println("Server: HTTPServer");
-								writer.println();
-								String response = lines.get(0);
-								lines.remove(0);
-								for (String line : lines)
-									response += "\n" + line;
-								writer.println(response);
-							} else {
-								String response = "<html><head>";
-								HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent(user);
-								TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
-								if (headerCreateEvent.getHeader() != null) {
-									response += headerCreateEvent.getHeader();
+						SocketAcceptedEvent sae = new SocketAcceptedEvent(socket.getRemoteSocketAddress());
+						EventExecuter.getInstance().executeEvent(sae);
+						if (!sae.isCanceld()) {
+							InputProcessor inputprocessor = new InputProcessor(reader, pMaxPOSTSize);
+							String path = inputprocessor.getPath();
+							TeachingIt.getInstance().getLogger().log(Level.INFO,
+									PREFIX + "Request from " + socket.getInetAddress() + " to path " + path);
+							Account account = TeachingIt.getInstance().getAccountManager().loginUser(
+									(String) TeachingIt.getInstance().getAccountManager().getSessionKey("username"),
+									(String) TeachingIt.getInstance().getAccountManager().getSessionKey("password"));
+							User user = new User(path, account, socket.getRemoteSocketAddress().toString(),
+									inputprocessor.getPostContent());
+							if (!inputprocessor.wasPostAccepted())
+								user.setUserVar("postaccepted", "false");
+							else
+								user.setUserVar("postaccepted", "true");
+							WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(user);
+							TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
+							if (!websiteCallEvent.isCanceld()) {
+								File file = registerdFiles.get(path);
+								if (file != null) {
+									List<String> lines = Files.readAllLines(Paths.get(path));
+									writer.println("HTTP/1.0 200 OK");
+									writer.println("Content-Type: text/html; charset=ISO-8859-1");
+									writer.println("Server: HTTPServer");
+									writer.println();
+									String response = lines.get(0);
+									lines.remove(0);
+									for (String line : lines)
+										response += "\n" + line;
+									writer.println(response);
+								} else {
+									String response = "<html><head>";
+									HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent(user);
+									TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
+									if (headerCreateEvent.getHeader() != null) {
+										response += headerCreateEvent.getHeader();
+									}
+									response = response
+											+ TeachingIt.getInstance().getPluginManager().getTheme().getHeader();
+									ContentCreateEvent contentCreateEvent = new ContentCreateEvent(user);
+									TeachingIt.getInstance().getEventExecuter().executeEvent(contentCreateEvent);
+									if (contentCreateEvent.getTitle() == null) {
+										contentCreateEvent.setTitle("Teaching IT");
+									}
+									if (contentCreateEvent.getContent() == null) {
+										contentCreateEvent = TeachingIt.getInstance().getPluginManager().getTheme()
+												.getErrorPageGenerator().getErrorPageNotFound(contentCreateEvent);
+									}
+									response += "<title>" + contentCreateEvent.getTitle() + "</title>" + "</head>"
+											+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyStart(user)
+											+ contentCreateEvent.getContent()
+											+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyEnd(user)
+											+ "</body></html>";
+									writer.println("HTTP/1.0 200 OK");
+									writer.println("Content-Type: text/html; charset=ISO-8859-1");
+									writer.println("Server: HTTPServer");
+									writer.println();
+									writer.println(response);
 								}
-								response = response
-										+ TeachingIt.getInstance().getPluginManager().getTheme().getHeader();
-								ContentCreateEvent contentCreateEvent = new ContentCreateEvent(user);
-								TeachingIt.getInstance().getEventExecuter().executeEvent(contentCreateEvent);
-								if (contentCreateEvent.getTitle() == null) {
-									contentCreateEvent.setTitle("Teaching IT");
-								}
-								if (contentCreateEvent.getContent() == null) {
-									contentCreateEvent = TeachingIt.getInstance().getPluginManager().getTheme()
-											.getErrorPageGenerator().getErrorPageNotFound(contentCreateEvent);
-								}
-								response += "<title>" + contentCreateEvent.getTitle() + "</title>" + "</head>"
-										+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyStart(user)
-										+ contentCreateEvent.getContent()
-										+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyEnd(user)
-										+ "</body></html>";
-								writer.println("HTTP/1.0 200 OK");
-								writer.println("Content-Type: text/html; charset=ISO-8859-1");
-								writer.println("Server: HTTPServer");
-								writer.println();
-								writer.println(response);
 							}
 						}
 					} catch (IOException iox) {
+					} catch (Exception e) {
+						StringWriter sw = new StringWriter();
+						e.printStackTrace(new PrintWriter(sw));
+						TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 					}
+				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
@@ -122,108 +133,141 @@ public class Webserver {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	private Object[] readPost(BufferedReader reader) throws IOException {
-		Object[] toReturn = new Object[2];
-		toReturn[0] = new ArrayList<String>();
-		String line = reader.readLine();
-		((ArrayList<String>) toReturn[0]).add(line);
-		StringBuilder raw = new StringBuilder();
-		raw.append("" + line);
-		boolean isPost = false;
-		if (line != null)
-			isPost = line.startsWith("POST");
-		int contentLength = 0;
-		boolean shouldRun = true;
-		while (shouldRun) {
-			if ((line = reader.readLine()) != null)
-				if (line.equals("")) {
-					shouldRun = false;
-					break;
-				}
-			((ArrayList<String>) toReturn[0]).add(line);
-			raw.append('\n' + line);
-			if (isPost) {
-				final String contentHeader = "Content-Length: ";
-				if (line.startsWith(contentHeader)) {
-					contentLength = Integer.parseInt(line.substring(contentHeader.length()));
+	private class InputProcessor {
+		private boolean postAccepted = true;
+		private HashMap<String, Object> postContent = new HashMap<>();
+		private ArrayList<String> input = new ArrayList<>();
+
+		public InputProcessor(BufferedReader reader, long pMaxPOSTSize) {
+			String line;
+			try {
+				line = reader.readLine();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				return;
+			}
+			input.add(line);
+			StringBuilder raw = new StringBuilder();
+			raw.append("" + line);
+			boolean isPost = false;
+			if (line != null)
+				isPost = line.startsWith("POST");
+			int contentLength = 0;
+			postAccepted = true;
+			boolean shouldRun = true;
+			while (shouldRun) {
+				try {
+					if ((line = reader.readLine()) != null)
+						if (line.equals("")) {
+							shouldRun = false;
+							break;
+						}
+					input.add(line);
+					raw.append('\n' + line);
+					if (isPost && postAccepted) {
+						final String contentHeader = "Content-Length: ";
+						if (line.startsWith(contentHeader)) {
+							contentLength = Integer.parseInt(line.substring(contentHeader.length()));
+							if (contentLength <= pMaxPOSTSize) {
+								postAccepted = true;
+							} else {
+								postAccepted = false;
+							}
+						}
+					}
+				} catch (IOException e) {
+					postAccepted = false;
+					e.printStackTrace();
 				}
 			}
-		}
-		StringBuilder body = new StringBuilder();
-		if (isPost) {
-			int c = 0;
-			for (int i = 0; i < contentLength; i++) {
-				c = reader.read();
-				body.append((char) c);
+			try {
+				StringBuilder body = new StringBuilder();
+				if (isPost) {
+					int c = 0;
+					for (int i = 0; i < contentLength; i++) {
+						c = reader.read();
+						postAccepted = false;
+						body.append((char) c);
+					}
+				}
+				raw.append(body.toString());
+				postContent = parseQuery(raw.toString());
+			} catch (IOException e) {
+				postAccepted = false;
+				e.printStackTrace();
 			}
 		}
-		raw.append(body.toString());
-		toReturn[1] = (raw.toString());
-		return toReturn;
-	}
 
-	private HashMap<String, Object> parseQuery(String query) throws UnsupportedEncodingException {
-		HashMap<String, Object> parameters = new HashMap<>();
-		if (query != null) {
-			String[] pairs = query.split("[&]");
-			for (String pair : pairs) {
-				String[] param = pair.split("[=]");
-				String key = null;
-				String value = null;
-				if (param.length > 0) {
-					try {
-						key = URLDecoder.decode(param[0], System.getProperty("file.encoding"));
-					} catch (IllegalArgumentException e) {
-						return parameters;
+		private HashMap<String, Object> parseQuery(String query) throws UnsupportedEncodingException {
+			HashMap<String, Object> parameters = new HashMap<>();
+			if (query != null) {
+				String[] pairs = query.split("[&]");
+				for (String pair : pairs) {
+					String[] param = pair.split("[=]");
+					String key = null;
+					String value = null;
+					if (param.length > 0) {
+						try {
+							key = URLDecoder.decode(param[0], System.getProperty("file.encoding"));
+						} catch (IllegalArgumentException e) {
+							return parameters;
+						}
 					}
-				}
-				if (param.length > 1) {
-					try {
-						value = URLDecoder.decode(param[1], System.getProperty("file.encoding"));
-					} catch (IllegalArgumentException e) {
-						return parameters;
+					if (param.length > 1) {
+						try {
+							value = URLDecoder.decode(param[1], System.getProperty("file.encoding"));
+						} catch (IllegalArgumentException e) {
+							return parameters;
+						}
 					}
-				}
-				if (parameters.containsKey(key)) {
-					Object obj = parameters.get(key);
-					if (obj instanceof List<?>) {
-						@SuppressWarnings("unchecked")
-						List<String> values = (List<String>) obj;
-						values.add(value);
+					if (parameters.containsKey(key)) {
+						Object obj = parameters.get(key);
+						if (obj instanceof List<?>) {
+							@SuppressWarnings("unchecked")
+							List<String> values = (List<String>) obj;
+							values.add(value);
 
-					} else if (obj instanceof String) {
-						List<String> values = new ArrayList<String>();
-						values.add((String) obj);
-						values.add(value);
-						parameters.put(key, values);
+						} else if (obj instanceof String) {
+							List<String> values = new ArrayList<String>();
+							values.add((String) obj);
+							values.add(value);
+							parameters.put(key, values);
+						}
+					} else {
+						parameters.put(key, value);
 					}
-				} else {
-					parameters.put(key, value);
 				}
 			}
+			return parameters;
 		}
-		return parameters;
-	}
 
-	private String getPath(ArrayList<String> list) throws IOException {
-		Pattern getLinePattern = Pattern.compile("(?i)GET\\s+/(.*?)\\s+HTTP/1\\.[01]");
-		String resource = "";
-		for (String line : list) {
-			Matcher matcher = getLinePattern.matcher(line);
-			if (matcher.matches())
-				resource = matcher.group(1);
+		public boolean wasPostAccepted() {
+			return postAccepted;
 		}
-		if (resource.equals("")) {
-			getLinePattern = Pattern.compile("(?i)POST\\s+/(.*?)\\s+HTTP/1\\.[01]");
-			resource = "";
-			for (String line : list) {
+
+		public HashMap<String, Object> getPostContent() {
+			return postContent;
+		}
+
+		public String getPath() {
+			String path = "";
+			Pattern getLinePattern = Pattern.compile("(?i)GET\\s+/(.*?)\\s+HTTP/1\\.[01]");
+			for (String line : input) {
 				Matcher matcher = getLinePattern.matcher(line);
 				if (matcher.matches())
-					resource = matcher.group(1);
+					path = matcher.group(1);
 			}
+			if (path.equals("")) {
+				getLinePattern = Pattern.compile("(?i)POST\\s+/(.*?)\\s+HTTP/1\\.[01]");
+				path = "";
+				for (String line : input) {
+					Matcher matcher = getLinePattern.matcher(line);
+					if (matcher.matches())
+						path = matcher.group(1);
+				}
+			}
+			return path;
 		}
-		return resource;
 	}
 
 	public void registerFile(File pFile, String pURL) {
