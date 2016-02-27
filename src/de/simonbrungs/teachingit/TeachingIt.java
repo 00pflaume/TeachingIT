@@ -139,7 +139,11 @@ public class TeachingIt {
 	}
 
 	private void registerListeners() {
-		EventExecuter.getInstance().registerListener(new DosProtection(), SocketAcceptedEvent.class, -1);
+		int mcpspu = Integer.parseInt(config.getProperty("MaxConnectsPerSecoundPerUser"));
+		int mcpsig = Integer.parseInt(config.getProperty("MaxConnectsPerSecoundsInGeneral"));
+		if (mcpspu > 0 && mcpsig > 0)
+			EventExecuter.getInstance().registerListener(new DosProtection(mcpspu, mcpsig), SocketAcceptedEvent.class,
+					-1);
 	}
 
 	private void registerIncludes() {
@@ -267,6 +271,8 @@ public class TeachingIt {
 				prop.setProperty("WebServerPort", "80");
 				prop.setProperty("SiteName", "TeachingIt");
 				prop.setProperty("MaxPOSTSizeInBytes", "128000000");
+				prop.setProperty("MaxConnectsPerSecoundsInGeneral", "100");
+				prop.setProperty("MaxConnectsPerSecoundPerUser", "3");
 				prop.setProperty("LogLevel", "INFO");
 				prop.setProperty("MySQLHost", "localhost");
 				prop.setProperty("MySQLPort", "3306");

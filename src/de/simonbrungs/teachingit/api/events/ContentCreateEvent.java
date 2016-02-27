@@ -1,14 +1,14 @@
 package de.simonbrungs.teachingit.api.events;
 
-import de.simonbrungs.teachingit.api.users.User;
+import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class ContentCreateEvent extends Event {
 	private boolean canceld = false;
 	private String content = null;
-	private User user;
+	private TempUser user;
 	private String title = null;
 
-	public ContentCreateEvent(User pUser) {
+	public ContentCreateEvent(TempUser pUser) {
 		user = pUser;
 	}
 
@@ -35,7 +35,7 @@ public class ContentCreateEvent extends Event {
 		content = pContent;
 	}
 
-	public User getUser() {
+	public TempUser getUser() {
 		return user;
 	}
 

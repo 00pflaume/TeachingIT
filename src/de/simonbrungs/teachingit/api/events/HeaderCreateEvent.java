@@ -1,17 +1,17 @@
 package de.simonbrungs.teachingit.api.events;
 
-import de.simonbrungs.teachingit.api.users.User;
+import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class HeaderCreateEvent extends Event {
 	private boolean canceld = false;
 	private String header = "";
-	private User user;
+	private TempUser user;
 
-	public HeaderCreateEvent(User pUser) {
+	public HeaderCreateEvent(TempUser pUser) {
 		user = pUser;
 	}
 
-	public User getUser() {
+	public TempUser getUser() {
 		return user;
 	}
 

@@ -2,14 +2,14 @@ package de.simonbrungs.teachingit.api.users;
 
 import java.util.HashMap;
 
-public class User {
+public class TempUser {
 	private Account account;
 	private String path;
 	private String ipAddress;
 	private HashMap<String, Object> postRequests;
 	private HashMap<String, String> userVars = new HashMap<>();
 
-	public User(String pPath, Account pAccount, String pIPAddress, HashMap<String, Object> pPostRequests) {
+	public TempUser(String pPath, Account pAccount, String pIPAddress, HashMap<String, Object> pPostRequests) {
 		path = pPath;
 		account = pAccount;
 		ipAddress = pIPAddress;

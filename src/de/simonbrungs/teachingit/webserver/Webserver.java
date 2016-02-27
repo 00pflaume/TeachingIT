@@ -29,7 +29,7 @@ import de.simonbrungs.teachingit.api.events.HeaderCreateEvent;
 import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
 import de.simonbrungs.teachingit.api.events.WebsiteCallEvent;
 import de.simonbrungs.teachingit.api.users.Account;
-import de.simonbrungs.teachingit.api.users.User;
+import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class Webserver {
 	private boolean shouldStop = false;
@@ -50,78 +50,85 @@ public class Webserver {
 		try {
 			try (ServerSocket serverSocket = new ServerSocket(pPort)) {
 				while (!shouldStop) {
-					try (Socket socket = serverSocket.accept();
-							InputStream input = socket.getInputStream();
-							BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-							OutputStream output = socket.getOutputStream();
-							PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
-						SocketAcceptedEvent sae = new SocketAcceptedEvent(socket.getRemoteSocketAddress());
-						EventExecuter.getInstance().executeEvent(sae);
-						if (!sae.isCanceld()) {
-							InputProcessor inputprocessor = new InputProcessor(reader, pMaxPOSTSize);
-							String path = inputprocessor.getPath();
-							TeachingIt.getInstance().getLogger().log(Level.INFO,
-									PREFIX + "Request from " + socket.getInetAddress() + " to path " + path);
-							Account account = TeachingIt.getInstance().getAccountManager().loginUser(
-									(String) TeachingIt.getInstance().getAccountManager().getSessionKey("username"),
-									(String) TeachingIt.getInstance().getAccountManager().getSessionKey("password"));
-							User user = new User(path, account, socket.getRemoteSocketAddress().toString(),
-									inputprocessor.getPostContent());
-							if (!inputprocessor.wasPostAccepted())
-								user.setUserVar("postaccepted", "false");
-							else
-								user.setUserVar("postaccepted", "true");
-							WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(user);
-							TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
-							if (!websiteCallEvent.isCanceld()) {
-								File file = registerdFiles.get(path);
-								if (file != null) {
-									List<String> lines = Files.readAllLines(Paths.get(path));
-									writer.println("HTTP/1.0 200 OK");
-									writer.println("Content-Type: text/html; charset=ISO-8859-1");
-									writer.println("Server: HTTPServer");
-									writer.println();
-									String response = lines.get(0);
-									lines.remove(0);
-									for (String line : lines)
-										response += "\n" + line;
-									writer.println(response);
-								} else {
-									String response = "<html><head>";
-									HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent(user);
-									TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
-									if (headerCreateEvent.getHeader() != null) {
-										response += headerCreateEvent.getHeader();
+					try {
+						try (Socket socket = serverSocket.accept();
+								InputStream input = socket.getInputStream();
+								BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+								OutputStream output = socket.getOutputStream();
+								PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
+							SocketAcceptedEvent sae = new SocketAcceptedEvent(socket.getRemoteSocketAddress());
+							EventExecuter.getInstance().executeEvent(sae);
+							if (!sae.isCanceld()) {
+								InputProcessor inputprocessor = new InputProcessor(reader, pMaxPOSTSize);
+								String path = inputprocessor.getPath();
+								TeachingIt.getInstance().getLogger().log(Level.INFO,
+										PREFIX + "Request from " + socket.getInetAddress() + " to path " + path);
+								Account account = TeachingIt.getInstance().getAccountManager().loginUser(
+										(String) TeachingIt.getInstance().getAccountManager().getSessionKey("username"),
+										(String) TeachingIt.getInstance().getAccountManager()
+												.getSessionKey("password"));
+								TempUser user = new TempUser(path, account, socket.getRemoteSocketAddress().toString(),
+										inputprocessor.getPostContent());
+								if (!inputprocessor.wasPostAccepted())
+									user.setUserVar("postaccepted", "false");
+								else
+									user.setUserVar("postaccepted", "true");
+								WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(user);
+								TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
+								if (!websiteCallEvent.isCanceld()) {
+									File file = registerdFiles.get(path);
+									if (file != null) {
+										List<String> lines = Files.readAllLines(Paths.get(path));
+										writer.println("HTTP/1.0 200 OK");
+										writer.println("Content-Type: text/html; charset=ISO-8859-1");
+										writer.println("Server: HTTPServer");
+										writer.println();
+										String response = lines.get(0);
+										lines.remove(0);
+										for (String line : lines)
+											response += "\n" + line;
+										writer.println(response);
+									} else {
+										String response = "<html><head>";
+										HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent(user);
+										TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
+										if (headerCreateEvent.getHeader() != null) {
+											response += headerCreateEvent.getHeader();
+										}
+										response = response
+												+ TeachingIt.getInstance().getPluginManager().getTheme().getHeader();
+										ContentCreateEvent contentCreateEvent = new ContentCreateEvent(user);
+										TeachingIt.getInstance().getEventExecuter().executeEvent(contentCreateEvent);
+										if (contentCreateEvent.getTitle() == null) {
+											contentCreateEvent.setTitle("Teaching IT");
+										}
+										if (contentCreateEvent.getContent() == null) {
+											contentCreateEvent = TeachingIt.getInstance().getPluginManager().getTheme()
+													.getErrorPageGenerator().getErrorPageNotFound(contentCreateEvent);
+										}
+										response += "<title>" + contentCreateEvent.getTitle() + "</title>" + "</head>"
+												+ TeachingIt.getInstance().getPluginManager().getTheme()
+														.getBodyStart(user)
+												+ contentCreateEvent.getContent() + TeachingIt.getInstance()
+														.getPluginManager().getTheme().getBodyEnd(user)
+												+ "</body></html>";
+										writer.println("HTTP/1.0 200 OK");
+										writer.println("Content-Type: text/html; charset=ISO-8859-1");
+										writer.println("Server: HTTPServer");
+										writer.println();
+										writer.println(response);
 									}
-									response = response
-											+ TeachingIt.getInstance().getPluginManager().getTheme().getHeader();
-									ContentCreateEvent contentCreateEvent = new ContentCreateEvent(user);
-									TeachingIt.getInstance().getEventExecuter().executeEvent(contentCreateEvent);
-									if (contentCreateEvent.getTitle() == null) {
-										contentCreateEvent.setTitle("Teaching IT");
-									}
-									if (contentCreateEvent.getContent() == null) {
-										contentCreateEvent = TeachingIt.getInstance().getPluginManager().getTheme()
-												.getErrorPageGenerator().getErrorPageNotFound(contentCreateEvent);
-									}
-									response += "<title>" + contentCreateEvent.getTitle() + "</title>" + "</head>"
-											+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyStart(user)
-											+ contentCreateEvent.getContent()
-											+ TeachingIt.getInstance().getPluginManager().getTheme().getBodyEnd(user)
-											+ "</body></html>";
-									writer.println("HTTP/1.0 200 OK");
-									writer.println("Content-Type: text/html; charset=ISO-8859-1");
-									writer.println("Server: HTTPServer");
-									writer.println();
-									writer.println(response);
 								}
 							}
+						} catch (IOException iox) {
+						} catch (Exception e) {
+							StringWriter sw = new StringWriter();
+							e.printStackTrace(new PrintWriter(sw));
+							TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 						}
-					} catch (IOException iox) {
-					} catch (Exception e) {
-						StringWriter sw = new StringWriter();
-						e.printStackTrace(new PrintWriter(sw));
-						TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+					} catch (OutOfMemoryError e) {
+						e.printStackTrace();
+						System.gc();
 					}
 				}
 			}
@@ -130,7 +137,6 @@ public class Webserver {
 			e.printStackTrace(new PrintWriter(sw));
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
-
 	}
 
 	private class InputProcessor {
@@ -147,8 +153,8 @@ public class Webserver {
 				return;
 			}
 			input.add(line);
-			StringBuilder raw = new StringBuilder();
-			raw.append("" + line);
+			String raw = "";
+			raw += line;
 			boolean isPost = false;
 			if (line != null)
 				isPost = line.startsWith("POST");
@@ -163,7 +169,7 @@ public class Webserver {
 							break;
 						}
 					input.add(line);
-					raw.append('\n' + line);
+					raw += ('\n' + line);
 					if (isPost && postAccepted) {
 						final String contentHeader = "Content-Length: ";
 						if (line.startsWith(contentHeader)) {
@@ -181,17 +187,17 @@ public class Webserver {
 				}
 			}
 			try {
-				StringBuilder body = new StringBuilder();
+				String body = "";
 				if (isPost) {
 					int c = 0;
 					for (int i = 0; i < contentLength; i++) {
 						c = reader.read();
 						postAccepted = false;
-						body.append((char) c);
+						body += ((char) c);
 					}
 				}
-				raw.append(body.toString());
-				postContent = parseQuery(raw.toString());
+				raw += (body.toString());
+				postContent = parseQuery(raw);
 			} catch (IOException e) {
 				postAccepted = false;
 				e.printStackTrace();

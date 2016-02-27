@@ -9,6 +9,7 @@ import de.simonbrungs.teachingit.TeachingIt;
 
 public class EventExecuter {
 	private static EventExecuter eventExecuter;
+	private ArrayList<ListenerEntry> registredEvents = new ArrayList<>();
 
 	public EventExecuter() {
 		eventExecuter = this;
@@ -18,12 +19,10 @@ public class EventExecuter {
 		return eventExecuter;
 	}
 
-	ArrayList<ListenerEntry> registerdEvents = new ArrayList<>();
-
-	public void registerListener(Listener<?> pListener, Class<?> pClass, int pPriority) {
+	public void registerListener(Listener<?> pListener, Class<? extends Event> pClass, int pPriority) {
 		ListenerEntry entry = new ListenerEntry(pListener, pClass, pPriority);
-		registerdEvents.add(entry);
-		sortByListenerPriority(registerdEvents);
+		registredEvents.add(entry);
+		sortByListenerPriority(registredEvents);
 	}
 
 	private void sortByListenerPriority(ArrayList<ListenerEntry> pToSort) {
@@ -50,12 +49,14 @@ public class EventExecuter {
 	}
 
 	public void executeEvent(Event pEvent) {
-		for (ListenerEntry listenerEntry : registerdEvents) {
+		for (ListenerEntry listenerEntry : registredEvents) {
 			if (pEvent.getClass().isAssignableFrom(listenerEntry.getToExecuteEventType())) {
 				try {
 					listenerEntry.getExecutiveListener().executeEvent(pEvent);
 				} catch (Exception e) {
-					StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+					StringWriter sw = new StringWriter();
+					e.printStackTrace(new PrintWriter(sw));
+					TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 				}
 				if (pEvent.isCanceld()) {
 					return;
@@ -67,9 +68,9 @@ public class EventExecuter {
 	private class ListenerEntry {
 		private int priority;
 		private Listener<?> listener;
-		private Class<?> eventClass;
+		private Class<? extends Event> eventClass;
 
-		public ListenerEntry(Listener<?> pListener, Class<?> pEvent, int pPriority) {
+		public ListenerEntry(Listener<?> pListener, Class<? extends Event> pEvent, int pPriority) {
 			priority = pPriority;
 			listener = pListener;
 			eventClass = pEvent;

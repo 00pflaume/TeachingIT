@@ -36,7 +36,9 @@ public class Group {
 				superGroupID = resultSet.getInt("supergroup");
 			}
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		if (superGroupID != -1)
@@ -57,7 +59,8 @@ public class Group {
 			}
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
-			e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return groupName;
@@ -75,7 +78,9 @@ public class Group {
 			preparedStatement.setString(1, pNewGroupName);
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
@@ -87,12 +92,19 @@ public class Group {
 	public boolean hasPermission(Permission pPermission) {
 		if (pPermission.getPermissionID() == -1)
 			return false;
-		if (getPermissions().contains(pPermission))
+		if (containsStartWith(getPermissions(), pPermission))
 			return true;
 		Group superGroup = getSuperGroup();
 		if (superGroup == null)
 			return false;
 		return superGroup.hasPermission(pPermission);
+	}
+
+	private boolean containsStartWith(ArrayList<Permission> pPermissionList, Permission pPermission) {
+		for (Permission perm : pPermissionList)
+			if (perm.getPermissionName().startsWith(pPermission.getPermissionName()))
+				return true;
+		return false;
 	}
 
 	public int getPermissionHeight() {
@@ -107,7 +119,9 @@ public class Group {
 				permissionHeight = resultSet.getInt("permissionheight");
 			}
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return permissionHeight;
@@ -127,7 +141,9 @@ public class Group {
 			preparedStatement.setInt(2, perm.getPermissionID());
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return true;
@@ -144,7 +160,9 @@ public class Group {
 			while (resultSet.next())
 				permissions.add(new Permission(resultSet.getInt("permissionid")));
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return permissions;
@@ -155,9 +173,9 @@ public class Group {
 		ArrayList<Account> accounts = new ArrayList<>();
 		try {
 			ResultSet resultSet = con.createStatement()
-					.executeQuery("select userid from `" + TeachingIt.getInstance().getConnector().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
-							+ "users` WHERE groupid='" + groupID + "' LIMIT 1");
+					.executeQuery("select userid from `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "users` WHERE groupid='"
+							+ groupID + "' LIMIT 1");
 			while (resultSet.next()) {
 				accounts.add(new Account(resultSet.getInt("userid")));
 			}
@@ -170,7 +188,9 @@ public class Group {
 				}
 			}
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
@@ -187,7 +207,9 @@ public class Group {
 					+ pPermissionHeight + "' WHERE id='" + groupID + "' LIMIT 1");
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
@@ -227,7 +249,9 @@ public class Group {
 								+ "permissions` WHERE id = '" + pPermission.getPermissionID() + "' LIMIT 1");
 				preparedStatement.execute();
 			} catch (SQLException e) {
-				StringWriter sw = new StringWriter();e.printStackTrace(new PrintWriter(sw));TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+				StringWriter sw = new StringWriter();
+				e.printStackTrace(new PrintWriter(sw));
+				TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			} finally {
 				TeachingIt.getInstance().getConnector().closeConnection(con);
 			}

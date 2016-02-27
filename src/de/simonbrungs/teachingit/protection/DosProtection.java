@@ -11,8 +11,12 @@ import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
 public class DosProtection implements Listener<SocketAcceptedEvent> {
 	HashMap<String, Integer> counter = new HashMap<>();
 	int connectedCounter = 0;
+	int connectionsPerUserPerSecound;
+	int connectionsPerSecoundGenerally;
 
-	public DosProtection() {
+	public DosProtection(int pConnectionsPerUserPerSecound, int pConnectionsPerSecoundGenerally) {
+		connectionsPerSecoundGenerally = pConnectionsPerSecoundGenerally;
+		connectionsPerUserPerSecound = pConnectionsPerUserPerSecound;
 		new Timer().scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
@@ -29,7 +33,7 @@ public class DosProtection implements Listener<SocketAcceptedEvent> {
 		connectedCounter++;
 		if (counted == null)
 			counted = 0;
-		if (counted > 10 || connectedCounter > 1000) {
+		if (counted > connectionsPerUserPerSecound || connectedCounter > connectionsPerSecoundGenerally) {
 			pEvent.setCanceld(true);
 		} else {
 			counter.put(socketAddress, counted + 1);

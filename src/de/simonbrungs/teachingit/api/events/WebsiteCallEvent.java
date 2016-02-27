@@ -1,12 +1,12 @@
 package de.simonbrungs.teachingit.api.events;
 
-import de.simonbrungs.teachingit.api.users.User;
+import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class WebsiteCallEvent extends Event {
 	private boolean isCanceld = false;
-	private User user;
+	private TempUser user;
 
-	public WebsiteCallEvent(User user) {
+	public WebsiteCallEvent(TempUser user) {
 		this.user = user;
 	}
 
@@ -24,7 +24,7 @@ public class WebsiteCallEvent extends Event {
 		isCanceld = pCanceld;
 	}
 
-	public User getUser() {
+	public TempUser getUser() {
 		return user;
 	}
 
