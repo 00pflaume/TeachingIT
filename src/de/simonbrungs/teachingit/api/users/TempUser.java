@@ -21,7 +21,8 @@ public class TempUser {
 	}
 
 	/**
-	 * As soon as the site is builded up this is getting deleted
+	 * As soon as the site is builded up the data which were inputed here gets
+	 * deleted
 	 * 
 	 * @param pKey
 	 *            The key for the value
@@ -41,15 +42,7 @@ public class TempUser {
 	}
 
 	public void setAccount(Account pAccount) {
-
-	}
-
-	public String getStringPostRequest(String pKey) {
-		Object string = postRequests.get(pKey);
-		if (string == null)
-			if (string instanceof String)
-				return (String) string;
-		return null;
+		account = pAccount;
 	}
 
 	public String getIPAddress() {
