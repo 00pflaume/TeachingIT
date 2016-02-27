@@ -1,7 +1,6 @@
 package de.simonbrungs.teachingit.protection;
 
 import java.util.HashMap;
-import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,7 +27,7 @@ public class DosProtection implements Listener<SocketAcceptedEvent> {
 
 	@Override
 	public void executeEvent(SocketAcceptedEvent pEvent) {
-		String socketAddress = (new StringTokenizer(pEvent.getRemoteSocketAddress().toString(), ":")).nextToken();
+		String socketAddress = pEvent.getRemoteSocketAddress().toString();
 		Integer counted = counter.get(socketAddress);
 		connectedCounter++;
 		if (counted == null)

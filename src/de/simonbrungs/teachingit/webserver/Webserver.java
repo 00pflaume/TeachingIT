@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,7 +68,9 @@ public class Webserver {
 										(String) TeachingIt.getInstance().getAccountManager().getSessionKey("username"),
 										(String) TeachingIt.getInstance().getAccountManager()
 												.getSessionKey("password"));
-								TempUser user = new TempUser(path, account, socket.getRemoteSocketAddress().toString(),
+								TempUser user = new TempUser(path, account,
+										(new StringTokenizer(socket.getRemoteSocketAddress().toString(), ":"))
+												.nextToken(),
 										inputprocessor.getPostContent());
 								if (!inputprocessor.wasPostAccepted())
 									user.setUserVar("postaccepted", "false");
@@ -99,13 +102,12 @@ public class Webserver {
 												+ TeachingIt.getInstance().getPluginManager().getTheme().getHeader();
 										ContentCreateEvent contentCreateEvent = new ContentCreateEvent(user);
 										TeachingIt.getInstance().getEventExecuter().executeEvent(contentCreateEvent);
-										if (contentCreateEvent.getTitle() == null) {
-											contentCreateEvent.setTitle("Teaching IT");
-										}
-										if (contentCreateEvent.getContent() == null) {
+										if (contentCreateEvent.getTitle() == null)
+											contentCreateEvent.setTitle(
+													TeachingIt.getInstance().getConfig().getProperty("SiteName"));
+										if (contentCreateEvent.getContent() == null)
 											contentCreateEvent = TeachingIt.getInstance().getPluginManager().getTheme()
 													.getErrorPageGenerator().getErrorPageNotFound(contentCreateEvent);
-										}
 										response += "<title>" + contentCreateEvent.getTitle() + "</title>" + "</head>"
 												+ TeachingIt.getInstance().getPluginManager().getTheme()
 														.getBodyStart(user)
