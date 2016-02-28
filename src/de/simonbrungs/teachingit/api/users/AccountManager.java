@@ -163,7 +163,17 @@ public class AccountManager {
 		}
 	}
 
-	public Account createAccount(String pUserName, String pEmail, String pPassword, boolean pActive) {
+	/**
+	 * 
+	 * @param pUserName
+	 * @param pEmail
+	 * @param pPassword
+	 *            Needs to be encrypted by SHA-1 to encrypt use
+	 *            encryptPassword(pPassword: String)
+	 * @param pActive
+	 * @return
+	 */
+	public Account createAccount(String pUserName, String pEmail, String pPassword, byte pActive) {
 		if (getAccount(pUserName) != null)
 			return null;
 		Connection con = TeachingIt.getInstance().getConnector().createConnection();
@@ -177,13 +187,11 @@ public class AccountManager {
 					+ TeachingIt.getInstance().getConnector().getTablePrefix() + "users` values (?, ?, ?, ?, ?, ?)");
 			preparedStatement.setString(1, pUserName);
 			preparedStatement.setString(2, pEmail);
-			preparedStatement.setString(3, encryptPassword(pPassword));
-			preparedStatement.setLong(4, System.currentTimeMillis() / 1000L);
-			preparedStatement.setInt(5, 0);
-			preparedStatement.setNull(3, 5);
-			byte activated = 0;
-			if (preAccountCreationEvent.isActivated())
-				activated = 1;
+			preparedStatement.setString(3, pPassword);
+			preparedStatement.setNull(4, 5);
+			preparedStatement.setLong(5, System.currentTimeMillis() / 1000L);
+			preparedStatement.setInt(6, 0);
+			byte activated = (preAccountCreationEvent.getActivated());
 			preparedStatement.setByte(6, activated);
 			preparedStatement.executeUpdate();
 			Account account = getAccount(pUserName);

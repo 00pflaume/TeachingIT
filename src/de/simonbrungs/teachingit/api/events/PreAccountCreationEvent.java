@@ -4,9 +4,9 @@ public class PreAccountCreationEvent extends Event {
 	private boolean cancel = false;
 	private String username;
 	private String email;
-	private boolean activated;
+	private byte activated;
 
-	public PreAccountCreationEvent(String pUserName, String pEmail, boolean pActive) {
+	public PreAccountCreationEvent(String pUserName, String pEmail, byte pActive) {
 		username = pUserName;
 		email = pEmail;
 		activated = pActive;
@@ -34,11 +34,11 @@ public class PreAccountCreationEvent extends Event {
 		return username;
 	}
 
-	public boolean isActivated() {
+	public byte getActivated() {
 		return activated;
 	}
 
-	public void setActivated(boolean pActivated) {
+	public void setActivated(byte pActivated) {
 		activated = pActivated;
 	}
 }
