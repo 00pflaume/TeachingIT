@@ -5,7 +5,6 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
@@ -18,7 +17,6 @@ public class MySQLConnector {
 	private String database;
 	private String tablePrefix;
 	private String host;
-	private static MySQLConnector instance;
 
 	public MySQLConnector(String pUser, String pPassword, int pPort, String pHost, String ptablePrefix,
 			String pDatabase) {
@@ -29,10 +27,6 @@ public class MySQLConnector {
 		database = pDatabase;
 		tablePrefix = ptablePrefix;
 		importDatabase();
-	}
-
-	public static MySQLConnector getInstance() {
-		return instance;
 	}
 
 	private void importDatabase() {
@@ -63,20 +57,8 @@ public class MySQLConnector {
 			preparedStatement.executeUpdate();
 			preparedStatement = con.prepareStatement("CREATE TABLE IF NOT EXISTS `" + database + "`.`" + tablePrefix
 					+ "usermeta` ( `metakey` VARCHAR(128) NOT NULL ," + " `id` INT(9) NOT NULL ,"
-					+ " `userid` INT NOT NULL ," + " `metavalue` VARCHAR(256) NOT NULL )");
+					+ " `userid` INT NOT NULL ," + " `metavalue` INT NOT NULL )");
 			preparedStatement.executeUpdate();
-			ResultSet resultSet = con.createStatement()
-					.executeQuery("select id from `" + getDatabase() + "`.`" + getTablePrefix() + "groups` LIMIT 1");
-			if (!resultSet.next()) {
-				preparedStatement = con.prepareStatement("insert into  `"
-						+ getDatabase() + "`.`"
-						+ getTablePrefix() + "groups` values (?, ?, ?, ?)");
-				preparedStatement.setString(1, "Users");
-				preparedStatement.setNull(2, 2);
-				preparedStatement.setInt(3, -1);
-				preparedStatement.setInt(4, 10);
-				preparedStatement.executeUpdate();
-			}
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));

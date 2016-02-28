@@ -10,7 +10,6 @@ import java.util.logging.Level;
 
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.groups.Group;
-import de.simonbrungs.teachingit.connectors.MySQLConnector;
 
 public class Account {
 	private int id;
@@ -43,17 +42,15 @@ public class Account {
 		return id;
 	}
 
-	public String getMetaInfo(String pMetaIdentifier) {
+	public String getMetaInfo(int pMetaInfoID) {
 		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		try {
-			PreparedStatement prepStmt = con
-					.prepareStatement("select metavalue from " + TeachingIt.getInstance().getConnector().getDatabase()
-							+ ".`" + TeachingIt.getInstance().getConnector().getTablePrefix()
-							+ "usermeta` WHERE userid= " + id + " AND metavalue= ? LIMIT 1");
-			prepStmt.setString(1, pMetaIdentifier);
-			ResultSet resultSet = prepStmt.executeQuery();
+			ResultSet resultSet = con.createStatement()
+					.executeQuery("select email from `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "users` WHERE userid='" + id
+							+ "' LIMIT 1");
 			if (resultSet.next()) {
-				return resultSet.getString("metavalue");
+				return resultSet.getString("email");
 			}
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
@@ -65,67 +62,15 @@ public class Account {
 		return null;
 	}
 
-	public void setUserName(String pUserName) {
-		Connection con = MySQLConnector.getInstance().createConnection();
-		try {
-			PreparedStatement preparedStatement = con
-					.prepareStatement("UPDATE `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "users` set user= ? WHERE id='"
-							+ id + "' LIMIT 1");
-			preparedStatement.setString(1, pUserName);
-			preparedStatement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			MySQLConnector.getInstance().closeConnection(con);
-		}
-	}
-
-	public void setMetaInfo(String pMetaIdentifier, String pMetaValue) {
-		if (getMetaInfo(pMetaIdentifier) != null)
-			removeMetaInfo(pMetaIdentifier);
-		Connection con = MySQLConnector.getInstance().createConnection();
-		try {
-			PreparedStatement preparedStatement = con.prepareStatement("insert into  `"
-					+ TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-					+ TeachingIt.getInstance().getConnector().getTablePrefix() + "usermeta` values (?, ?, ?, ?)");
-			preparedStatement.setString(1, pMetaIdentifier);
-			preparedStatement.setString(2, pMetaValue);
-			preparedStatement.setNull(3, 3);
-			preparedStatement.setInt(4, id);
-			preparedStatement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			MySQLConnector.getInstance().closeConnection(con);
-		}
-	}
-
-	public void removeMetaInfo(String pMetaIdentifier) {
-		Connection con = MySQLConnector.getInstance().createConnection();
-		try {
-			PreparedStatement preparedStatement = con
-					.prepareStatement("DELETE FROM `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "usermeta` WHERE userid = '"
-							+ id + "' AND metakey = ?");
-			preparedStatement.setString(1, pMetaIdentifier);
-			preparedStatement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			MySQLConnector.getInstance().closeConnection(con);
-		}
-	}
-
-	public byte isActivated() {
+	public String getMetaInfo(String pMetaIdentifier) {
 		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		try {
 			ResultSet resultSet = con.createStatement()
-					.executeQuery("select activated from `" + TeachingIt.getInstance().getConnector().getDatabase()
-							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix() + "users` WHERE id='"
-							+ id + "' LIMIT 1");
+					.executeQuery("select email from `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "users` WHERE userid='" + id
+							+ "' LIMIT 1");
 			if (resultSet.next()) {
-				return resultSet.getByte("activated");
+				return resultSet.getString("email");
 			}
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
@@ -134,7 +79,41 @@ public class Account {
 		} finally {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
-		return 0;
+		return null;
+	}
+
+	public void setUserName() {
+
+	}
+
+	public boolean addMetaInfo(String pMetaIdentifier) {
+		if (getMetaInfo(pMetaIdentifier) != null)
+			return false;
+		return true;
+	}
+
+	public void removeMetaInfo(String pMetaIdentifier) {
+
+	}
+
+	public boolean isActivated() {
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
+		try {
+			ResultSet resultSet = con.createStatement()
+					.executeQuery("select activated from `" + TeachingIt.getInstance().getConnector().getDatabase()
+							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix() + "users` WHERE id='"
+							+ id + "' LIMIT 1");
+			if (resultSet.next()) {
+				return resultSet.getByte("activated") == 1;
+			}
+		} catch (SQLException e) {
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+		} finally {
+			TeachingIt.getInstance().getConnector().closeConnection(con);
+		}
+		return false;
 	}
 
 	public Group getGroup() {
@@ -146,8 +125,6 @@ public class Account {
 							+ "groupsusers` WHERE userid='" + id + "' LIMIT 1");
 			if (resultSet.next()) {
 				return new Group(resultSet.getInt("groupid"));
-			} else {
-				return new Group(1);
 			}
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
@@ -160,19 +137,7 @@ public class Account {
 	}
 
 	public void setEmail(String pEmail) {
-		Connection con = MySQLConnector.getInstance().createConnection();
-		try {
-			PreparedStatement preparedStatement = con
-					.prepareStatement("UPDATE `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnector().getTablePrefix()
-							+ "users` set email= ? WHERE id='" + id + "' LIMIT 1");
-			preparedStatement.setString(1, pEmail);
-			preparedStatement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			MySQLConnector.getInstance().closeConnection(con);
-		}
+
 	}
 
 	public String getEmail() {
@@ -195,11 +160,6 @@ public class Account {
 		return null;
 	}
 
-	/**
-	 * 
-	 * @param pPassword
-	 *            Needs to be encrypted in SHA-1
-	 */
 	public void setPassword(String pPassword) {
 		pPassword = TeachingIt.getInstance().getAccountManager().encryptPassword(pPassword);
 		Connection con = TeachingIt.getInstance().getConnector().createConnection();
@@ -245,19 +205,7 @@ public class Account {
 	}
 
 	public void setActivated(byte status) {
-		Connection con = MySQLConnector.getInstance().createConnection();
-		try {
-			PreparedStatement preparedStatement = con
-					.prepareStatement("UPDATE `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnector().getTablePrefix()
-							+ "users` set activated= ? WHERE id='" + id + "' LIMIT 1");
-			preparedStatement.setByte(1, status);
-			preparedStatement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			MySQLConnector.getInstance().closeConnection(con);
-		}
+
 	}
 
 	private void removeFromGroup() {

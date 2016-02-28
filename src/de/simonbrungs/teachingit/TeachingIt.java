@@ -33,8 +33,8 @@ public class TeachingIt {
 	private Webserver webserver;
 	private Properties config;
 	private boolean shouldClose = false;
-	private Console console;
-	private PluginManager pluginManager;
+	private Console console = new Console();
+	private PluginManager pluginManager = new PluginManager();
 	public final String PREFIX = "[TeachingIt] ";
 	private EventExecuter eventExecuter;
 	private MySQLConnector connector;
@@ -64,83 +64,77 @@ public class TeachingIt {
 	}
 
 	public TeachingIt() {
+		main = this;
 		try {
-			main = this;
-			try {
-				LogManager lm = LogManager.getLogManager();
-				File folder = new File("logs");
-				if (!folder.exists())
-					folder.mkdirs();
-				String minute = Calendar.getInstance().get(Calendar.MINUTE) + "";
-				if (minute.length() < 2) {
-					minute = "0" + minute;
-				}
-				File file = new File("./logs/" + Calendar.getInstance().get(Calendar.YEAR) + "-"
-						+ Calendar.getInstance().get(Calendar.MONTH) + "-"
-						+ Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "-"
-						+ Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "-" + minute + ".xml");
-				int count = 0;
-				while (file.exists()) {
-					count++;
-					file = new File("./logs/" + file.getName().substring(0, file.getName().length() - 4) + "-" + count
-							+ ".xml");
-				}
-				fh = new FileHandler(file.getAbsolutePath());
-				logger = Logger.getLogger("log");
-				lm.addLogger(logger);
-				logger.setLevel(Level.INFO);
-				fh.setFormatter(new XMLFormatter());
-				logger.addHandler(fh);
-			} catch (SecurityException | IOException e) {
-				System.out.println(PREFIX + "Fatal Error!");
-				e.printStackTrace();
-				shutDown(1);
+			LogManager lm = LogManager.getLogManager();
+			File folder = new File("logs");
+			if (!folder.exists())
+				folder.mkdirs();
+			String minute = Calendar.getInstance().get(Calendar.MINUTE) + "";
+			if (minute.length() < 2) {
+				minute = "0" + minute;
 			}
-			getLogger().log(Level.INFO, PREFIX + "Server is starting");
-			if (createConfig()) {
-				File folder = new File("plugins");
-				if (!folder.exists()) {
-					folder.mkdirs();
-				}
-				folder = new File("theme");
-				if (!folder.exists()) {
-					folder.mkdirs();
-				}
-				getLogger().log(Level.WARNING,
-						PREFIX + "The Config was created. Please input your data into the config file.");
-				return;
+			File file = new File("./logs/" + Calendar.getInstance().get(Calendar.YEAR) + "-"
+					+ Calendar.getInstance().get(Calendar.MONTH) + "-"
+					+ Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + "-"
+					+ Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + "-" + minute + ".xml");
+			int count = 0;
+			while (file.exists()) {
+				count++;
+				file = new File(
+						"./logs/" + file.getName().substring(0, file.getName().length() - 4) + "-" + count + ".xml");
 			}
-			config = initConfig();
-			logger.setLevel(Level.parse(config.getProperty("LogLevel")));
-			connector = new MySQLConnector(config.getProperty("MySQLUser"), config.getProperty("MySQLPassword"),
-					Integer.parseInt(config.getProperty("MySQLPort")), config.getProperty("MySQLHost"),
-					config.getProperty("MySQLTablePrefix"), config.getProperty("MySQLDatabase"));
-			eventExecuter = new EventExecuter();
-			groupManager = new GroupManager();
-			accountManager = new AccountManager();
-			pluginManager = new PluginManager();
-			console = new Console();
-			registerCommands();
-			registerListeners();
-			getLogger().log(Level.INFO, PREFIX + "Now going to load plugins.");
-			loadPlugins();
-			getLogger().log(Level.INFO, PREFIX + "Plugins loaded.");
-			getLogger().log(Level.INFO, PREFIX + "Now going to load theme");
-			if (loadTheme()) {
-				getLogger().log(Level.INFO, PREFIX + "The server is started");
-				webserver = new Webserver(Long.parseLong(config.getProperty("MaxPOSTSizeInBytes")),
-						Integer.parseInt(config.getProperty("WebServerPort")));
-				console.commandsReader();
-			} else {
-				getLogger().log(Level.INFO, PREFIX + "The server is now going to hold.");
-				shutDown(0);
-			}
-		} catch (Exception e) {
-			getLogger().log(Level.WARNING, PREFIX + "Fatal Error.");
+			fh = new FileHandler(file.getAbsolutePath());
+			logger = Logger.getLogger("log");
+			lm.addLogger(logger);
+			logger.setLevel(Level.INFO);
+			fh.setFormatter(new XMLFormatter());
+			logger.addHandler(fh);
+		} catch (SecurityException | IOException e) {
+			System.out.println(PREFIX + "Fatal Error!");
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
+
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			shutDown(1);
+		}
+		getLogger().log(Level.INFO, PREFIX + "Server is starting");
+		if (createConfig()) {
+			File folder = new File("plugins");
+			if (!folder.exists()) {
+				folder.mkdirs();
+			}
+			folder = new File("theme");
+			if (!folder.exists()) {
+				folder.mkdirs();
+			}
+			getLogger().log(Level.WARNING,
+					PREFIX + "The Config was created. Please input your data into the config file.");
+			return;
+		}
+		config = initConfig();
+		logger.setLevel(Level.parse(config.getProperty("LogLevel")));
+		connector = new MySQLConnector(config.getProperty("MySQLUser"), config.getProperty("MySQLPassword"),
+				Integer.parseInt(config.getProperty("MySQLPort")), config.getProperty("MySQLHost"),
+				config.getProperty("MySQLTablePrefix"), config.getProperty("MySQLDatabase"));
+		eventExecuter = new EventExecuter();
+		groupManager = new GroupManager();
+		accountManager = new AccountManager();
+		registerCommands();
+		registerListeners();
+		getLogger().log(Level.INFO, PREFIX + "Now going to load plugins.");
+		loadPlugins();
+		getLogger().log(Level.INFO, PREFIX + "Plugins loaded.");
+		getLogger().log(Level.INFO, PREFIX + "Now going to load theme");
+		if (loadTheme()) {
+			getLogger().log(Level.INFO, PREFIX + "The server is started");
+			webserver = new Webserver(Long.parseLong(config.getProperty("MaxPOSTSizeInBytes")),
+					Integer.parseInt(config.getProperty("WebServerPort")));
+			registerIncludes();
+			console.commandsReader();
+		} else {
+			getLogger().log(Level.INFO, PREFIX + "The server is now going to hold.");
+			shutDown(0);
 		}
 	}
 
@@ -150,6 +144,16 @@ public class TeachingIt {
 		if (mcpspu > 0 && mcpsig > 0)
 			EventExecuter.getInstance().registerListener(new DosProtection(mcpspu, mcpsig), SocketAcceptedEvent.class,
 					-1);
+	}
+
+	private void registerIncludes() {
+		File folder = new File("include");
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
+		for (final File fileEntry : folder.listFiles()) {
+			getWebserver().registerFile(fileEntry, fileEntry.getName());
+		}
 	}
 
 	public Webserver getWebserver() {
