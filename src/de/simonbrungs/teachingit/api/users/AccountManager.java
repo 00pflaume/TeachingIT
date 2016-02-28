@@ -22,14 +22,14 @@ import de.simonbrungs.teachingit.api.events.AfterAccountCreationEvent;
 import de.simonbrungs.teachingit.api.events.PreAccountCreationEvent;
 
 public class AccountManager {
-	private HashMap<String, SessionKey> sessionKeys = new HashMap<>();
-	private static AccountManager accountmanager;
+	private HashMap<String, SessionKeyEntry> sessionKeys = new HashMap<>();
+	private static AccountManager accountmanager = null;
 
-	private class SessionKey {
+	private class SessionKeyEntry {
 		private long creationTime;
 		private Object content;
 
-		public SessionKey(Object pContent) {
+		public SessionKeyEntry(Object pContent) {
 			content = pContent;
 			creationTime = System.currentTimeMillis() / 1000;
 		}
@@ -43,7 +43,9 @@ public class AccountManager {
 		}
 	}
 
-	public AccountManager() {
+	public AccountManager() throws IllegalAccessException {
+		if (accountmanager != null)
+			throw new IllegalAccessException();
 		accountmanager = this;
 		new Timer().scheduleAtFixedRate(new TimerTask() {
 			@Override
@@ -59,8 +61,8 @@ public class AccountManager {
 
 	public void clear() {
 		ArrayList<String> toRemove = new ArrayList<>();
-		Set<Entry<String, SessionKey>> entrys = sessionKeys.entrySet();
-		for (Entry<String, SessionKey> entry : entrys) {
+		Set<Entry<String, SessionKeyEntry>> entrys = sessionKeys.entrySet();
+		for (Entry<String, SessionKeyEntry> entry : entrys) {
 			if (entry.getValue().getCreationTime() < (System.currentTimeMillis() / 1000 - 86400)) {
 				toRemove.add(entry.getKey());
 			}
@@ -102,7 +104,7 @@ public class AccountManager {
 	}
 
 	public Object getSessionKey(String pKey) {
-		SessionKey sessionKey = sessionKeys.get(pKey);
+		SessionKeyEntry sessionKey = sessionKeys.get(pKey);
 		if (sessionKey == null)
 			return null;
 		return sessionKey.getContent();
@@ -113,13 +115,7 @@ public class AccountManager {
 	}
 
 	public void setSessionKey(String pIPAddress, String pKey, Object pValue) {
-		new Timer().scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				removeSessionKey(pIPAddress, pKey);
-			}
-		}, 86400000, 86400000);
-		sessionKeys.put(pIPAddress + pKey, new SessionKey(pValue));
+		sessionKeys.put(pIPAddress + pKey, new SessionKeyEntry(pValue));
 	}
 
 	public Account getAccount(String pUsername) {

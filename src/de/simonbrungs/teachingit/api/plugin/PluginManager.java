@@ -23,6 +23,17 @@ public class PluginManager {
 	private ArrayList<Plugin> plugins = new ArrayList<>();
 	private static final String PLUGINMANAGERPREFIX = "[PluginManager] ";
 	private Theme theme = null;
+	private static PluginManager instance = null;
+
+	public PluginManager() throws IllegalAccessException {
+		if (instance != null)
+			throw new IllegalAccessException();
+		instance = this;
+	}
+
+	public static PluginManager getInstance() {
+		return instance;
+	}
 
 	public Theme getTheme() {
 		return theme;
@@ -60,24 +71,24 @@ public class PluginManager {
 					+ propertieFile.getProperty("main") + "\" could not be found.");
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			
+
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING,
 					PLUGINMANAGERPREFIX + "An error occurred while loading the theme \"" + pThemeJar.getName() + "\".");
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			
+
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} catch (SecurityException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			
+
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} catch (IllegalArgumentException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			
+
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		return false;
@@ -156,7 +167,7 @@ public class PluginManager {
 					+ propertieFile.getProperty("main") + "\" class could not be found.");
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			
+
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException | SecurityException
 				| IllegalArgumentException e) {
@@ -164,7 +175,7 @@ public class PluginManager {
 					PLUGINMANAGERPREFIX + "An error occurred while loading a plugin.");
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			
+
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 	}
@@ -190,7 +201,7 @@ public class PluginManager {
 		} catch (IOException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			
+
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {

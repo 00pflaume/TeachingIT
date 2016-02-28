@@ -1,7 +1,6 @@
 package de.simonbrungs.teachingit.webserver;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,8 +12,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URLDecoder;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +32,6 @@ import de.simonbrungs.teachingit.api.users.TempUser;
 public class Webserver {
 	private boolean shouldStop = false;
 	private Thread webserverThread;
-	private HashMap<String, File> registerdFiles = new HashMap<>();
 	public final String PREFIX = "[Webserver] ";
 
 	public Webserver(long maxPOSTSize, int pPort) {
@@ -79,19 +75,7 @@ public class Webserver {
 								WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(user);
 								TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
 								if (!websiteCallEvent.isCanceld()) {
-									File file = registerdFiles.get(path);
-									if (file != null) {
-										List<String> lines = Files.readAllLines(Paths.get(path));
-										writer.println("HTTP/1.0 200 OK");
-										writer.println("Content-Type: text/html; charset=ISO-8859-1");
-										writer.println("Server: HTTPServer");
-										writer.println();
-										String response = lines.get(0);
-										lines.remove(0);
-										for (String line : lines)
-											response += "\n" + line;
-										writer.println(response);
-									} else {
+									{
 										String response = "<html><head>";
 										HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent(user);
 										TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
@@ -131,6 +115,7 @@ public class Webserver {
 					} catch (OutOfMemoryError e) {
 						e.printStackTrace();
 						System.gc();
+						runWebserver(pMaxPOSTSize, pPort);
 					}
 				}
 			}
@@ -276,18 +261,6 @@ public class Webserver {
 			}
 			return path;
 		}
-	}
-
-	public void registerFile(File pFile, String pURL) {
-		registerdFiles.put(pURL, pFile);
-	}
-
-	public boolean isURLRegisterd(String pURL) {
-		return registerdFiles.containsKey(pURL);
-	}
-
-	public boolean unregisterFile(String pURL) {
-		return registerdFiles.remove(pURL) != null;
 	}
 
 	@SuppressWarnings("deprecation")
