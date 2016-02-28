@@ -31,6 +31,9 @@ public class Console {
 		Scanner scanner = new Scanner(System.in);
 		while (!TeachingIt.getInstance().getShouldClose()) {
 			String scanned = scanner.nextLine();
+			String removed = scanned;
+			while (!(removed = scanned.replace("  ", " ")).equals(scanned))
+				scanned = removed;
 			ArrayList<String> commandWithArgs = new ArrayList<String>(Arrays.asList(scanned.split(" ")));
 			if (!commandWithArgs.isEmpty()) {
 				Command command = registerdCommands.get(commandWithArgs.get(0).toLowerCase());

@@ -27,15 +27,15 @@ public class DosProtection implements Listener<SocketAcceptedEvent> {
 
 	@Override
 	public void executeEvent(SocketAcceptedEvent pEvent) {
-		String socketAddress = pEvent.getRemoteSocketAddress().toString();
-		Integer counted = counter.get(socketAddress);
+		String ip = pEvent.getIP();
+		Integer counted = counter.get(ip);
 		connectedCounter++;
 		if (counted == null)
 			counted = 0;
 		if (counted > connectionsPerUserPerSecound || connectedCounter > connectionsPerSecoundGenerally) {
 			pEvent.setCanceld(true);
 		} else {
-			counter.put(socketAddress, counted + 1);
+			counter.put(ip, counted + 1);
 		}
 	}
 }

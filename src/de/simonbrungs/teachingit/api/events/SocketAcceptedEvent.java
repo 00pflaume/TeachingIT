@@ -1,17 +1,15 @@
 package de.simonbrungs.teachingit.api.events;
 
-import java.net.SocketAddress;
-
 public class SocketAcceptedEvent extends Event {
 	private boolean canceld = false;
-	private SocketAddress socketAddress;
+	private String ip;
 
-	public SocketAcceptedEvent(SocketAddress remoteSocketAddress) {
-		socketAddress = remoteSocketAddress;
+	public SocketAcceptedEvent(String pIP) {
+		ip = pIP;
 	}
 
-	public SocketAddress getRemoteSocketAddress() {
-		return socketAddress;
+	public String getIP() {
+		return ip;
 	}
 
 	@Override

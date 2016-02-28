@@ -41,7 +41,7 @@ public class TempUser {
 	}
 
 	public void setAccount(Account pAccount) {
-
+		account = pAccount;
 	}
 
 	public String getStringPostRequest(String pKey) {

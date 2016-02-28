@@ -171,7 +171,7 @@ public class AccountManager {
 	 *            Needs to be encrypted by SHA-1 to encrypt use
 	 *            encryptPassword(pPassword: String)
 	 * @param pActive
-	 * @return
+	 * @return Returns the account if it was created else it returns null
 	 */
 	public Account createAccount(String pUserName, String pEmail, String pPassword, byte pActive) {
 		if (getAccount(pUserName) != null)

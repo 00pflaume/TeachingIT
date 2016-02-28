@@ -53,7 +53,8 @@ public class Webserver {
 								BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 								OutputStream output = socket.getOutputStream();
 								PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
-							SocketAcceptedEvent sae = new SocketAcceptedEvent(socket.getRemoteSocketAddress());
+							SocketAcceptedEvent sae = new SocketAcceptedEvent(
+									(new StringTokenizer(socket.getRemoteSocketAddress().toString(), ":")).nextToken());
 							EventExecuter.getInstance().executeEvent(sae);
 							if (!sae.isCanceld()) {
 								InputProcessor inputprocessor = new InputProcessor(reader, pMaxPOSTSize);
