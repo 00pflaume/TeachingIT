@@ -52,7 +52,7 @@ public class EventExecuter {
 		for (ListenerEntry listenerEntry : registredEvents) {
 			if (pEvent.getClass().isAssignableFrom(listenerEntry.getToExecuteEventType())) {
 				try {
-					listenerEntry.getExecutiveListener().executeEvent(pEvent);
+					listenerEntry.getExecutiveListener();
 				} catch (Exception e) {
 					StringWriter sw = new StringWriter();
 					e.printStackTrace(new PrintWriter(sw));

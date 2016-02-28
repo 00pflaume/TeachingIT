@@ -11,9 +11,20 @@ import de.simonbrungs.teachingit.TeachingIt;
 public class Console {
 	private HashMap<String, Command> registerdCommands = new HashMap<>();
 	private final static String PREFIX = "[CONSOLE] ";
+	private static Console instance = null;
+
+	public Console() throws IllegalAccessException {
+		if (instance != null)
+			throw new IllegalAccessException();
+		instance = this;
+	}
 
 	public void registerCommand(Command pCommand, String pCommandName) {
 		registerdCommands.put(pCommandName.toLowerCase(), pCommand);
+	}
+
+	public static Console getInstance() {
+		return instance;
 	}
 
 	public void commandsReader() {

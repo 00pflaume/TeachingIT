@@ -218,7 +218,7 @@ public class Group {
 		Group superGroup = getSuperGroup();
 		if (superGroup == null)
 			return false;
-		if (superGroup.equals(pSuperGroup))
+		if (superGroup.getGroupID() == pSuperGroup.getGroupID())
 			return true;
 		return superGroup.isSuperGroup(pSuperGroup);
 	}
