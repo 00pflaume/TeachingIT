@@ -27,6 +27,7 @@ import de.simonbrungs.teachingit.api.events.HeaderCreateEvent;
 import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
 import de.simonbrungs.teachingit.api.events.WebsiteCallEvent;
 import de.simonbrungs.teachingit.api.users.Account;
+import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class Webserver {
@@ -34,7 +35,7 @@ public class Webserver {
 	private Thread webserverThread;
 	public final String PREFIX = "[Webserver] ";
 
-	public Webserver(long maxPOSTSize, int pPort) {
+	public Webserver(final long maxPOSTSize, final int pPort) {
 		webserverThread = new Thread(new Runnable() {
 			public void run() {
 				runWebserver(maxPOSTSize, pPort);
@@ -59,16 +60,16 @@ public class Webserver {
 							if (!sae.isCanceld()) {
 								InputProcessor inputprocessor = new InputProcessor(reader, pMaxPOSTSize);
 								String path = inputprocessor.getPath();
+								String ipAddress = (new StringTokenizer(socket.getRemoteSocketAddress().toString(),
+										":")).nextToken();
 								TeachingIt.getInstance().getLogger().log(Level.INFO,
 										PREFIX + "Request from " + socket.getInetAddress() + " to path " + path);
-								Account account = TeachingIt.getInstance().getAccountManager().loginUser(
-										(String) TeachingIt.getInstance().getAccountManager().getSessionKey("username"),
-										(String) TeachingIt.getInstance().getAccountManager()
-												.getSessionKey("password"));
-								TempUser user = new TempUser(path, account,
-										(new StringTokenizer(socket.getRemoteSocketAddress().toString(), ":"))
-												.nextToken(),
-										inputprocessor.getPostContent());
+								Account account = TeachingIt.getInstance().getAccountManager()
+										.loginUser((String) TeachingIt.getInstance().getAccountManager()
+												.getSessionKey(ipAddress, "username"),
+										AccountManager.getInstance().encryptPassword((String) TeachingIt.getInstance()
+												.getAccountManager().getSessionKey(ipAddress, "password")));
+								TempUser user = new TempUser(path, account, ipAddress, inputprocessor.getPostContent());
 								if (!inputprocessor.wasPostAccepted())
 									user.setUserVar("postaccepted", "false");
 								else

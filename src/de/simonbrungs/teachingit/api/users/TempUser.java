@@ -8,6 +8,7 @@ public class TempUser {
 	private String ipAddress;
 	private HashMap<String, Object> postRequests;
 	private HashMap<String, String> userVars = new HashMap<>();
+	private String[] test;
 
 	public TempUser(String pPath, Account pAccount, String pIPAddress, HashMap<String, Object> pPostRequests) {
 		path = pPath;
@@ -16,6 +17,13 @@ public class TempUser {
 		postRequests = pPostRequests;
 	}
 
+	/**
+	 * Cause of Security reasons the first sended POST is ignored. Cause of that
+	 * always put in your form at first an input which is hidden
+	 * 
+	 * @param pKey
+	 * @return
+	 */
 	public Object getPostRequest(String pKey) {
 		return postRequests.get(pKey);
 	}
@@ -33,6 +41,7 @@ public class TempUser {
 	}
 
 	public String getUserVar(String pKey) {
+		System.out.println(test[0] + test[1]);
 		return userVars.get(pKey);
 	}
 
@@ -42,14 +51,6 @@ public class TempUser {
 
 	public void setAccount(Account pAccount) {
 		account = pAccount;
-	}
-
-	public String getStringPostRequest(String pKey) {
-		Object string = postRequests.get(pKey);
-		if (string == null)
-			if (string instanceof String)
-				return (String) string;
-		return null;
 	}
 
 	public String getIPAddress() {

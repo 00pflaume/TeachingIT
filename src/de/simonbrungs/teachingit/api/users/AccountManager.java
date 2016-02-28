@@ -103,8 +103,8 @@ public class AccountManager {
 		}
 	}
 
-	public Object getSessionKey(String pKey) {
-		SessionKeyEntry sessionKey = sessionKeys.get(pKey);
+	public Object getSessionKey(String pIPAddress, String pKey) {
+		SessionKeyEntry sessionKey = sessionKeys.get(pIPAddress + pKey);
 		if (sessionKey == null)
 			return null;
 		return sessionKey.getContent();
