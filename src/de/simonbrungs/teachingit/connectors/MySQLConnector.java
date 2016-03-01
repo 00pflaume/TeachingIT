@@ -22,6 +22,7 @@ public class MySQLConnector {
 
 	public MySQLConnector(String pUser, String pPassword, int pPort, String pHost, String ptablePrefix,
 			String pDatabase) {
+		instance = this;
 		user = pUser;
 		password = pPassword;
 		port = pPort;
@@ -68,9 +69,8 @@ public class MySQLConnector {
 			ResultSet resultSet = con.createStatement()
 					.executeQuery("select id from `" + getDatabase() + "`.`" + getTablePrefix() + "groups` LIMIT 1");
 			if (!resultSet.next()) {
-				preparedStatement = con.prepareStatement("insert into  `"
-						+ getDatabase() + "`.`"
-						+ getTablePrefix() + "groups` values (?, ?, ?, ?)");
+				preparedStatement = con.prepareStatement(
+						"insert into  `" + getDatabase() + "`.`" + getTablePrefix() + "groups` values (?, ?, ?, ?)");
 				preparedStatement.setString(1, "Users");
 				preparedStatement.setNull(2, 2);
 				preparedStatement.setInt(3, -1);

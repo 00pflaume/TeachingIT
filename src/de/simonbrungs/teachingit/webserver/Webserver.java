@@ -27,7 +27,6 @@ import de.simonbrungs.teachingit.api.events.HeaderCreateEvent;
 import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
 import de.simonbrungs.teachingit.api.events.WebsiteCallEvent;
 import de.simonbrungs.teachingit.api.users.Account;
-import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class Webserver {
@@ -64,11 +63,14 @@ public class Webserver {
 										":")).nextToken();
 								TeachingIt.getInstance().getLogger().log(Level.INFO,
 										PREFIX + "Request from " + socket.getInetAddress() + " to path " + path);
-								Account account = TeachingIt.getInstance().getAccountManager()
-										.loginUser((String) TeachingIt.getInstance().getAccountManager()
-												.getSessionKey(ipAddress, "username"),
-										AccountManager.getInstance().encryptPassword((String) TeachingIt.getInstance()
-												.getAccountManager().getSessionKey(ipAddress, "password")));
+
+								Account account = null;
+								if (TeachingIt.getInstance().getAccountManager().getSessionKey(ipAddress,
+										"username") != null) {
+									account = TeachingIt.getInstance().getAccountManager()
+											.getAccount((String) TeachingIt.getInstance().getAccountManager()
+													.getSessionKey(ipAddress, "username"));
+								}
 								TempUser user = new TempUser(path, account, ipAddress, inputprocessor.getPostContent());
 								if (!inputprocessor.wasPostAccepted())
 									user.setUserVar("postaccepted", "false");

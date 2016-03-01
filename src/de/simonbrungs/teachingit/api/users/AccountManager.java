@@ -81,7 +81,7 @@ public class AccountManager {
 							+ TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "users` WHERE user= ? AND password= ? LIMIT 1");
 			prepStmt.setString(1, pUsername);
-			prepStmt.setString(2, encryptPassword(pEncryptPassword));
+			prepStmt.setString(2, pEncryptPassword);
 			ResultSet resultSet = prepStmt.executeQuery();
 			if (resultSet.next()) {
 				Account account = new Account(resultSet.getInt("id"));
