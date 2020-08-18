@@ -3,9 +3,9 @@ package de.simonbrungs.teachingit.api.events;
 import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class ContentCreateEvent extends Event {
+	private final TempUser user;
 	private boolean canceld = false;
 	private String content = null;
-	private final TempUser user;
 	private String title = null;
 
 	public ContentCreateEvent(TempUser pUser) {

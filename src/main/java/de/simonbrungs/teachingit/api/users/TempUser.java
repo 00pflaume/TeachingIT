@@ -3,11 +3,11 @@ package de.simonbrungs.teachingit.api.users;
 import java.util.HashMap;
 
 public class TempUser {
-	private Account account;
 	private final String path;
 	private final String ipAddress;
 	private final HashMap<String, Object> postRequests;
 	private final HashMap<String, String> userVars = new HashMap<>();
+	private Account account;
 	private String[] test;
 
 	public TempUser(String pPath, Account pAccount, String pIPAddress, HashMap<String, Object> pPostRequests) {

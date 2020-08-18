@@ -19,8 +19,8 @@ import java.util.regex.Pattern;
 
 public class Webserver {
 	public final String PREFIX = "[Webserver] ";
-	private boolean shouldStop = false;
 	private final Thread webserverThread;
+	private boolean shouldStop = false;
 
 	public Webserver(final long maxPOSTSize, final int pPort) {
 		webserverThread = new Thread(new Runnable() {
@@ -125,9 +125,9 @@ public class Webserver {
 	}
 
 	private class InputProcessor {
+		private final ArrayList<String> input = new ArrayList<>();
 		private boolean postAccepted = true;
 		private HashMap<String, Object> postContent = new HashMap<>();
-		private final ArrayList<String> input = new ArrayList<>();
 
 		public InputProcessor(BufferedReader reader, long pMaxPOSTSize) {
 			String line;

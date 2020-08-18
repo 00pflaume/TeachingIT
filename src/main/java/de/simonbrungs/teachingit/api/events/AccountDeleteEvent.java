@@ -3,8 +3,8 @@ package de.simonbrungs.teachingit.api.events;
 import de.simonbrungs.teachingit.api.users.Account;
 
 public class AccountDeleteEvent extends Event {
-	private boolean canceld = false;
 	private final Account account;
+	private boolean canceld = false;
 	private boolean shouldBeDelted = true;
 
 	public AccountDeleteEvent(Account pAccount) {

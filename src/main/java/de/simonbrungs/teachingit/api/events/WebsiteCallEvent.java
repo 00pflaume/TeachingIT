@@ -3,8 +3,8 @@ package de.simonbrungs.teachingit.api.events;
 import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class WebsiteCallEvent extends Event {
-	private boolean isCanceld = false;
 	private final TempUser user;
+	private boolean isCanceld = false;
 
 	public WebsiteCallEvent(TempUser user) {
 		this.user = user;

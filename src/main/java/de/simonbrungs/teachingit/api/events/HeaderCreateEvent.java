@@ -3,9 +3,9 @@ package de.simonbrungs.teachingit.api.events;
 import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class HeaderCreateEvent extends Event {
+	private final TempUser user;
 	private boolean canceld = false;
 	private String header = "";
-	private final TempUser user;
 
 	public HeaderCreateEvent(TempUser pUser) {
 		user = pUser;

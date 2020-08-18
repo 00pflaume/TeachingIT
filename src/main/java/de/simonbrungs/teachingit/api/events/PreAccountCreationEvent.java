@@ -1,9 +1,9 @@
 package de.simonbrungs.teachingit.api.events;
 
 public class PreAccountCreationEvent extends Event {
-	private boolean cancel = false;
 	private final String username;
 	private final String email;
+	private boolean cancel = false;
 	private byte activated;
 
 	public PreAccountCreationEvent(String pUserName, String pEmail, byte pActive) {

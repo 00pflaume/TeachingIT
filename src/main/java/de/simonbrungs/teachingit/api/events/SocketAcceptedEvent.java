@@ -1,8 +1,8 @@
 package de.simonbrungs.teachingit.api.events;
 
 public class SocketAcceptedEvent extends Event {
-	private boolean canceld = false;
 	private final String ip;
+	private boolean canceld = false;
 
 	public SocketAcceptedEvent(String pIP) {
 		ip = pIP;
