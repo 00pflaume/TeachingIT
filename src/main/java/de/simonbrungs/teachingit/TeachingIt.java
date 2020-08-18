@@ -277,6 +277,7 @@ public class TeachingIt {
 				prop.setProperty("MySQLDatabase", "TeachingIt");
 				prop.setProperty("MySQLTablePrefix", "TIt_");
 				prop.setProperty("MySQLUseSSL", "false");
+				prop.setProperty("ServerTimeZone", "UTC");
 				prop.store(output, null);
 				return true;
 			}

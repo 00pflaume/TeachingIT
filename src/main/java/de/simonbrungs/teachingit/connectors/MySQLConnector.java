@@ -1,15 +1,11 @@
 package de.simonbrungs.teachingit.connectors;
 
+import de.simonbrungs.teachingit.TeachingIt;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.logging.Level;
-
-import de.simonbrungs.teachingit.TeachingIt;
 
 public class MySQLConnector {
 	private String user;
@@ -21,7 +17,7 @@ public class MySQLConnector {
 	private static MySQLConnector instance;
 
 	public MySQLConnector(String pUser, String pPassword, int pPort, String pHost, String ptablePrefix,
-			String pDatabase) {
+	                      String pDatabase) {
 		instance = this;
 		user = pUser;
 		password = pPassword;
@@ -96,24 +92,16 @@ public class MySQLConnector {
 	public Connection createConnection() {
 		Connection con;
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
 			String add = "";
 			if (TeachingIt.getInstance().getConfig().getProperty("MySQLUseSSL").equalsIgnoreCase("false")) {
-				add = "&useSSL=false";
+				add = "&allowPublicKeyRetrieval=true&useSSL=false";
 			}
 			con = DriverManager.getConnection(
-					"jdbc:mysql://" + host + ":" + port + "/?user=" + user + "&password=" + password + add);
+					"jdbc:mysql://" + host + ":" + port + "/?user=" + user + "&password=" + password +"&serverTimezone="+TeachingIt.getInstance().getConfig().getProperty("ServerTimeZone")+ add);
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-			return null;
-		} catch (ClassNotFoundException e1) {
-			System.out.println(TeachingIt.getInstance().PREFIX + "Fatal Error the system is now going to hold.");
-			StringWriter sw = new StringWriter();
-			e1.printStackTrace(new PrintWriter(sw));
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-			TeachingIt.getInstance().shutDown(1);
 			return null;
 		}
 		return con;
