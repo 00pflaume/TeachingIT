@@ -5,6 +5,7 @@ import de.simonbrungs.teachingit.TeachingIt;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.*;
+import java.util.Properties;
 import java.util.logging.Level;
 
 public class MySQLConnector {
@@ -15,6 +16,7 @@ public class MySQLConnector {
 	private final String database;
 	private final String tablePrefix;
 	private final String host;
+	private final Properties connectionProperties;
 
 	public MySQLConnector(String pUser, String pPassword, int pPort, String pHost, String pTablePrefix,
 	                      String pDatabase) {
@@ -25,6 +27,14 @@ public class MySQLConnector {
 		host = pHost;
 		database = pDatabase;
 		tablePrefix = pTablePrefix;
+		connectionProperties = new Properties();
+		connectionProperties.setProperty("user", pUser);
+		connectionProperties.setProperty("password", pPassword);
+		connectionProperties.setProperty("serverTimezone", TeachingIt.getInstance().getConfig().getProperty("ServerTimeZone"));
+		if (TeachingIt.getInstance().getConfig().getProperty("MySQLUseSSL").equalsIgnoreCase("false")) {
+			connectionProperties.setProperty("useSSL", "false");
+			connectionProperties.setProperty("allowPublicKeyRetrieval", "true");
+		}
 		importDatabase();
 	}
 
@@ -92,12 +102,7 @@ public class MySQLConnector {
 	public Connection createConnection() {
 		Connection con;
 		try {
-			String add = "";
-			if (TeachingIt.getInstance().getConfig().getProperty("MySQLUseSSL").equalsIgnoreCase("false")) {
-				add = "&allowPublicKeyRetrieval=true&useSSL=false";
-			}
-			con = DriverManager.getConnection(
-					"jdbc:mysql://" + host + ":" + port + "/?user=" + user + "&password=" + password + "&serverTimezone=" + TeachingIt.getInstance().getConfig().getProperty("ServerTimeZone") + add);
+			con = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port, connectionProperties);
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
