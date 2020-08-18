@@ -1,10 +1,10 @@
 package de.simonbrungs.teachingit.api.plugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import de.simonbrungs.teachingit.TeachingIt;
+import de.simonbrungs.teachingit.api.plugin.theme.Theme;
+import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
+
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,15 +15,11 @@ import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import de.simonbrungs.teachingit.TeachingIt;
-import de.simonbrungs.teachingit.api.plugin.theme.Theme;
-import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
-
 public class PluginManager {
-	private ArrayList<Plugin> plugins = new ArrayList<>();
 	private static final String PLUGINMANAGERPREFIX = "[PluginManager] ";
-	private Theme theme = null;
 	private static PluginManager instance = null;
+	private final ArrayList<Plugin> plugins = new ArrayList<>();
+	private Theme theme = null;
 
 	public PluginManager() throws IllegalAccessException {
 		if (instance != null)
@@ -98,7 +94,7 @@ public class PluginManager {
 			throws InstantiationException, MalformedURLException, ClassNotFoundException, IllegalAccessException {
 		URLClassLoader loader = null;
 		try {
-			loader = new URLClassLoader(new URL[] { pPluginJar.toURI().toURL() });
+			loader = new URLClassLoader(new URL[]{pPluginJar.toURI().toURL()});
 			Class<?> cl = loader.loadClass(propertieFile.getProperty("main"));
 			if (pSearchedSuperClass.isAssignableFrom(cl)) {
 				Plugin instance = (Plugin) cl.getDeclaredConstructor().newInstance();

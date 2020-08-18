@@ -1,5 +1,7 @@
 package de.simonbrungs.teachingit.api.groups;
 
+import de.simonbrungs.teachingit.TeachingIt;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -8,8 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
-
-import de.simonbrungs.teachingit.TeachingIt;
 
 public class GroupManager {
 	private static GroupManager groupManager = null;

@@ -1,8 +1,8 @@
 package de.simonbrungs.teachingit.api;
 
 public class ContentPage {
-	private String htmlContent;
-	private String websiteTitle;
+	private final String htmlContent;
+	private final String websiteTitle;
 
 	public ContentPage(String pHTMLContent, String pWebsiteTitle) {
 		htmlContent = pHTMLContent;

@@ -4,7 +4,7 @@ import de.simonbrungs.teachingit.api.users.Account;
 
 public class AccountDeleteEvent extends Event {
 	private boolean canceld = false;
-	private Account account;
+	private final Account account;
 	private boolean shouldBeDelted = true;
 
 	public AccountDeleteEvent(Account pAccount) {
@@ -15,12 +15,12 @@ public class AccountDeleteEvent extends Event {
 		return account;
 	}
 
-	public void setShouldBeDeleted(boolean pShouldBeDelted) {
-		shouldBeDelted = pShouldBeDelted;
-	}
-
 	public boolean getShouldBeDeleted() {
 		return shouldBeDelted;
+	}
+
+	public void setShouldBeDeleted(boolean pShouldBeDelted) {
+		shouldBeDelted = pShouldBeDelted;
 	}
 
 	@Override

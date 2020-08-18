@@ -1,17 +1,17 @@
 package de.simonbrungs.teachingit.api;
 
+import de.simonbrungs.teachingit.TeachingIt;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.logging.Level;
 
-import de.simonbrungs.teachingit.TeachingIt;
-
 public class Console {
-	private HashMap<String, Command> registerdCommands = new HashMap<>();
 	private final static String PREFIX = "[CONSOLE] ";
 	private static Console instance = null;
+	private final HashMap<String, Command> registerdCommands = new HashMap<>();
 
 	public Console() throws IllegalAccessException {
 		if (instance != null)
@@ -19,12 +19,12 @@ public class Console {
 		instance = this;
 	}
 
-	public void registerCommand(Command pCommand, String pCommandName) {
-		registerdCommands.put(pCommandName.toLowerCase(), pCommand);
-	}
-
 	public static Console getInstance() {
 		return instance;
+	}
+
+	public void registerCommand(Command pCommand, String pCommandName) {
+		registerdCommands.put(pCommandName.toLowerCase(), pCommand);
 	}
 
 	public void commandsReader() {

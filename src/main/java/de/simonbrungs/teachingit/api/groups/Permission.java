@@ -1,5 +1,7 @@
 package de.simonbrungs.teachingit.api.groups;
 
+import de.simonbrungs.teachingit.TeachingIt;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -7,8 +9,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
-
-import de.simonbrungs.teachingit.TeachingIt;
 
 public class Permission {
 	private int permissionID;
@@ -71,11 +71,7 @@ public class Permission {
 							+ "permissions` WHERE permission=? LIMIT 1");
 			prepStmt.setString(1, pPermissionName.toLowerCase());
 			resultSet = prepStmt.executeQuery();
-			if (resultSet.next()) {
-				return true;
-			} else {
-				return false;
-			}
+			return resultSet.next();
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
@@ -93,11 +89,7 @@ public class Permission {
 					.executeQuery("select permission from `" + TeachingIt.getInstance().getConnector().getDatabase()
 							+ "`.`" + TeachingIt.getInstance().getConnector().getTablePrefix()
 							+ "permissions` WHERE id='" + pPermissionID + "' LIMIT 1");
-			if (resultSet.next()) {
-				return true;
-			} else {
-				return false;
-			}
+			return resultSet.next();
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
@@ -105,14 +97,6 @@ public class Permission {
 		}
 		TeachingIt.getInstance().getConnector().closeConnection(con);
 		return false;
-	}
-
-	public String getPermissionName() {
-		return permissionName;
-	}
-
-	public int getPermissionID() {
-		return permissionID;
 	}
 
 	public static Permission createPermission(String pPermission) throws IllegalArgumentException {
@@ -139,5 +123,13 @@ public class Permission {
 			perm = new Permission(pPermission);
 		}
 		return perm;
+	}
+
+	public String getPermissionName() {
+		return permissionName;
+	}
+
+	public int getPermissionID() {
+		return permissionID;
 	}
 }

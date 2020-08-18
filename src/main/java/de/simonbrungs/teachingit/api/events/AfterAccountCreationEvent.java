@@ -4,7 +4,7 @@ import de.simonbrungs.teachingit.api.users.Account;
 
 public class AfterAccountCreationEvent extends Event {
 	private boolean isCanceld = false;
-	private Account account;
+	private final Account account;
 
 	public AfterAccountCreationEvent(Account pAccount) {
 		account = pAccount;

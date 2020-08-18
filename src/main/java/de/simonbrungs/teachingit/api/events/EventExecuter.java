@@ -1,15 +1,15 @@
 package de.simonbrungs.teachingit.api.events;
 
+import de.simonbrungs.teachingit.TeachingIt;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-import de.simonbrungs.teachingit.TeachingIt;
-
 public class EventExecuter {
 	private static EventExecuter eventExecuter;
-	private ArrayList<ListenerEntry> registredEvents = new ArrayList<>();
+	private final ArrayList<ListenerEntry> registredEvents = new ArrayList<>();
 
 	public EventExecuter() {
 		eventExecuter = this;
@@ -66,9 +66,9 @@ public class EventExecuter {
 	}
 
 	private class ListenerEntry {
-		private int priority;
-		private Listener<?> listener;
-		private Class<? extends Event> eventClass;
+		private final int priority;
+		private final Listener<?> listener;
+		private final Class<? extends Event> eventClass;
 
 		public ListenerEntry(Listener<?> pListener, Class<? extends Event> pEvent, int pPriority) {
 			priority = pPriority;

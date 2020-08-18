@@ -5,7 +5,7 @@ import de.simonbrungs.teachingit.api.users.TempUser;
 public class ContentCreateEvent extends Event {
 	private boolean canceld = false;
 	private String content = null;
-	private TempUser user;
+	private final TempUser user;
 	private String title = null;
 
 	public ContentCreateEvent(TempUser pUser) {
@@ -17,13 +17,13 @@ public class ContentCreateEvent extends Event {
 		return "ContentCreateEvent";
 	}
 
-	public void setCanceld(boolean pCanceld) {
-		canceld = pCanceld;
-	}
-
 	@Override
 	public boolean isCanceld() {
 		return canceld;
+	}
+
+	public void setCanceld(boolean pCanceld) {
+		canceld = pCanceld;
 	}
 
 	public String getContent() {
@@ -39,11 +39,11 @@ public class ContentCreateEvent extends Event {
 		return user;
 	}
 
-	public void setTitle(String pTitle) {
-		title = pTitle;
-	}
-
 	public String getTitle() {
 		return title;
+	}
+
+	public void setTitle(String pTitle) {
+		title = pTitle;
 	}
 }

@@ -1,7 +1,7 @@
 package de.simonbrungs.teachingit.api.navigator;
 
 public class NavigatorEntryInformation {
-	private String displayName;
+	private final String displayName;
 	private String destination = null;
 
 	public NavigatorEntryInformation(String pDisplayName, String pDestination) {

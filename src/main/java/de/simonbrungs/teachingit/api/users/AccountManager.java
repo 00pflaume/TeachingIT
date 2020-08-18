@@ -1,5 +1,10 @@
 package de.simonbrungs.teachingit.api.users;
 
+import de.simonbrungs.teachingit.TeachingIt;
+import de.simonbrungs.teachingit.api.events.AccountDeleteEvent;
+import de.simonbrungs.teachingit.api.events.AfterAccountCreationEvent;
+import de.simonbrungs.teachingit.api.events.PreAccountCreationEvent;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.MessageDigest;
@@ -8,40 +13,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.logging.Level;
 
-import de.simonbrungs.teachingit.TeachingIt;
-import de.simonbrungs.teachingit.api.events.AccountDeleteEvent;
-import de.simonbrungs.teachingit.api.events.AfterAccountCreationEvent;
-import de.simonbrungs.teachingit.api.events.PreAccountCreationEvent;
-
 public class AccountManager {
-	private HashMap<String, SessionKeyEntry> sessionKeys = new HashMap<>();
 	private static AccountManager accountmanager = null;
-
-	private class SessionKeyEntry {
-		private long creationTime;
-		private Object content;
-
-		public SessionKeyEntry(Object pContent) {
-			content = pContent;
-			creationTime = System.currentTimeMillis() / 1000;
-		}
-
-		public Object getContent() {
-			return content;
-		}
-
-		public long getCreationTime() {
-			return creationTime;
-		}
-	}
+	private final HashMap<String, SessionKeyEntry> sessionKeys = new HashMap<>();
 
 	public AccountManager() throws IllegalAccessException {
 		if (accountmanager != null)
@@ -164,12 +142,10 @@ public class AccountManager {
 	}
 
 	/**
-	 * 
 	 * @param pUserName
 	 * @param pEmail
-	 * @param pPassword
-	 *            Needs to be encrypted by SHA-1 to encrypt use
-	 *            encryptPassword(pPassword: String)
+	 * @param pPassword Needs to be encrypted by SHA-1 to encrypt use
+	 *                  encryptPassword(pPassword: String)
 	 * @param pActive
 	 * @return Returns the account if it was created else it returns null
 	 */
@@ -261,5 +237,23 @@ public class AccountManager {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		return null;
+	}
+
+	private class SessionKeyEntry {
+		private final long creationTime;
+		private final Object content;
+
+		public SessionKeyEntry(Object pContent) {
+			content = pContent;
+			creationTime = System.currentTimeMillis() / 1000;
+		}
+
+		public Object getContent() {
+			return content;
+		}
+
+		public long getCreationTime() {
+			return creationTime;
+		}
 	}
 }

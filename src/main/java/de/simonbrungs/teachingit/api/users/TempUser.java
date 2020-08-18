@@ -4,10 +4,10 @@ import java.util.HashMap;
 
 public class TempUser {
 	private Account account;
-	private String path;
-	private String ipAddress;
-	private HashMap<String, Object> postRequests;
-	private HashMap<String, String> userVars = new HashMap<>();
+	private final String path;
+	private final String ipAddress;
+	private final HashMap<String, Object> postRequests;
+	private final HashMap<String, String> userVars = new HashMap<>();
 	private String[] test;
 
 	public TempUser(String pPath, Account pAccount, String pIPAddress, HashMap<String, Object> pPostRequests) {
@@ -20,7 +20,7 @@ public class TempUser {
 	/**
 	 * Cause of Security reasons the first sended POST is ignored. Cause of that
 	 * always put in your form at first an input which is hidden
-	 * 
+	 *
 	 * @param pKey
 	 * @return
 	 */
@@ -30,11 +30,9 @@ public class TempUser {
 
 	/**
 	 * As soon as the site is builded up this is getting deleted
-	 * 
-	 * @param pKey
-	 *            The key for the value
-	 * @param pValue
-	 *            The value that should be set
+	 *
+	 * @param pKey   The key for the value
+	 * @param pValue The value that should be set
 	 */
 	public void setUserVar(String pKey, String pValue) {
 		userVars.put(pKey, pValue);
@@ -49,10 +47,6 @@ public class TempUser {
 		return userVars.remove(pKey);
 	}
 
-	public void setAccount(Account pAccount) {
-		account = pAccount;
-	}
-
 	public String getIPAddress() {
 		return ipAddress;
 	}
@@ -63,6 +57,10 @@ public class TempUser {
 
 	public Account getAccount() {
 		return account;
+	}
+
+	public void setAccount(Account pAccount) {
+		account = pAccount;
 	}
 
 }

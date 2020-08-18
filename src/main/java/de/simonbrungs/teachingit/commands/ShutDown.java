@@ -1,9 +1,9 @@
 package de.simonbrungs.teachingit.commands;
 
-import java.util.ArrayList;
-
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.Command;
+
+import java.util.ArrayList;
 
 public class ShutDown implements Command {
 

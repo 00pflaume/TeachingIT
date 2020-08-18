@@ -1,8 +1,8 @@
 package de.simonbrungs.teachingit.api.navigator;
 
 public class NavigatorEntry {
-	private NavigatorEntryInformation[] subEntrys;
-	private NavigatorEntryInformation navBarEntry;
+	private final NavigatorEntryInformation[] subEntrys;
+	private final NavigatorEntryInformation navBarEntry;
 
 	public NavigatorEntry(NavigatorEntryInformation pNavBarEntry, NavigatorEntryInformation[] pNavBarSubEntrys) {
 		subEntrys = pNavBarSubEntrys;

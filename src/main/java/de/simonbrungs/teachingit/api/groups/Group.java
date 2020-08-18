@@ -1,5 +1,8 @@
 package de.simonbrungs.teachingit.api.groups;
 
+import de.simonbrungs.teachingit.TeachingIt;
+import de.simonbrungs.teachingit.api.users.Account;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -9,11 +12,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-import de.simonbrungs.teachingit.TeachingIt;
-import de.simonbrungs.teachingit.api.users.Account;
-
 public class Group {
-	private int groupID;
+	private final int groupID;
 
 	public Group(int pGroupID) {
 		groupID = pGroupID;
@@ -127,6 +127,22 @@ public class Group {
 		return permissionHeight;
 	}
 
+	public void setPermissionHeight(int pPermissionHeight) {
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
+		try {
+			PreparedStatement preparedStatement = con.prepareStatement("UPDATE `"
+					+ TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+					+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` set permissionheight='"
+					+ pPermissionHeight + "' WHERE id='" + groupID + "' LIMIT 1");
+			preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
+		}
+		TeachingIt.getInstance().getConnector().closeConnection(con);
+	}
+
 	public boolean addPermission(String pPermission) {
 		Permission perm = Permission.createPermission(pPermission);
 		if (hasPermission(perm))
@@ -196,22 +212,6 @@ public class Group {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
 		return accounts;
-	}
-
-	public void setPermissionHeight(int pPermissionHeight) {
-		Connection con = TeachingIt.getInstance().getConnector().createConnection();
-		try {
-			PreparedStatement preparedStatement = con.prepareStatement("UPDATE `"
-					+ TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-					+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groups` set permissionheight='"
-					+ pPermissionHeight + "' WHERE id='" + groupID + "' LIMIT 1");
-			preparedStatement.executeUpdate();
-		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();
-			e.printStackTrace(new PrintWriter(sw));
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-		}
-		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
 
 	public boolean isSuperGroup(Group pSuperGroup) {

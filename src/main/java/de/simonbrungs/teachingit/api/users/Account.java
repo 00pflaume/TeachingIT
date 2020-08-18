@@ -1,5 +1,9 @@
 package de.simonbrungs.teachingit.api.users;
 
+import de.simonbrungs.teachingit.TeachingIt;
+import de.simonbrungs.teachingit.api.groups.Group;
+import de.simonbrungs.teachingit.connectors.MySQLConnector;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -8,12 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
-import de.simonbrungs.teachingit.TeachingIt;
-import de.simonbrungs.teachingit.api.groups.Group;
-import de.simonbrungs.teachingit.connectors.MySQLConnector;
-
 public class Account {
-	private int id;
+	private final int id;
 
 	public Account(int pID) {
 		id = pID;
@@ -37,6 +37,22 @@ public class Account {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
 		return null;
+	}
+
+	public void setUserName(String pUserName) {
+		Connection con = MySQLConnector.getInstance().createConnection();
+		try {
+			PreparedStatement preparedStatement = con
+					.prepareStatement("UPDATE `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "users` set user= ? WHERE id='"
+							+ id + "' LIMIT 1");
+			preparedStatement.setString(1, pUserName);
+			preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			MySQLConnector.getInstance().closeConnection(con);
+		}
 	}
 
 	public int getID() {
@@ -63,22 +79,6 @@ public class Account {
 			TeachingIt.getInstance().getConnector().closeConnection(con);
 		}
 		return null;
-	}
-
-	public void setUserName(String pUserName) {
-		Connection con = MySQLConnector.getInstance().createConnection();
-		try {
-			PreparedStatement preparedStatement = con
-					.prepareStatement("UPDATE `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "users` set user= ? WHERE id='"
-							+ id + "' LIMIT 1");
-			preparedStatement.setString(1, pUserName);
-			preparedStatement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			MySQLConnector.getInstance().closeConnection(con);
-		}
 	}
 
 	public void setMetaInfo(String pMetaIdentifier, String pMetaValue) {
@@ -159,20 +159,23 @@ public class Account {
 		return null;
 	}
 
-	public void setEmail(String pEmail) {
-		Connection con = MySQLConnector.getInstance().createConnection();
+	public void setGroup(Group group) {
+		Connection con = TeachingIt.getInstance().getConnector().createConnection();
+		PreparedStatement preparedStatement;
+		removeFromGroup();
 		try {
-			PreparedStatement preparedStatement = con
-					.prepareStatement("UPDATE `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnector().getTablePrefix()
-							+ "users` set email= ? WHERE id='" + id + "' LIMIT 1");
-			preparedStatement.setString(1, pEmail);
+			preparedStatement = con
+					.prepareStatement("insert into  `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groupsusers` values (?, ?)");
+			preparedStatement.setInt(1, id);
+			preparedStatement.setInt(2, group.getGroupID());
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			MySQLConnector.getInstance().closeConnection(con);
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
+		TeachingIt.getInstance().getConnector().closeConnection(con);
 	}
 
 	public String getEmail() {
@@ -195,10 +198,24 @@ public class Account {
 		return null;
 	}
 
+	public void setEmail(String pEmail) {
+		Connection con = MySQLConnector.getInstance().createConnection();
+		try {
+			PreparedStatement preparedStatement = con
+					.prepareStatement("UPDATE `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
+							+ TeachingIt.getInstance().getConnector().getTablePrefix()
+							+ "users` set email= ? WHERE id='" + id + "' LIMIT 1");
+			preparedStatement.setString(1, pEmail);
+			preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			MySQLConnector.getInstance().closeConnection(con);
+		}
+	}
+
 	/**
-	 * 
-	 * @param pPassword
-	 *            Needs to be encrypted in SHA-1
+	 * @param pPassword Needs to be encrypted in SHA-1
 	 */
 	public void setPassword(String pPassword) {
 		pPassword = TeachingIt.getInstance().getAccountManager().encryptPassword(pPassword);
@@ -269,25 +286,6 @@ public class Account {
 							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groupsusers` WHERE userid = '"
 							+ id + "' LIMIT 1");
 			preparedStatement.execute();
-		} catch (SQLException e) {
-			StringWriter sw = new StringWriter();
-			e.printStackTrace(new PrintWriter(sw));
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-		}
-		TeachingIt.getInstance().getConnector().closeConnection(con);
-	}
-
-	public void setGroup(Group group) {
-		Connection con = TeachingIt.getInstance().getConnector().createConnection();
-		PreparedStatement preparedStatement;
-		removeFromGroup();
-		try {
-			preparedStatement = con
-					.prepareStatement("insert into  `" + TeachingIt.getInstance().getConnector().getDatabase() + "`.`"
-							+ TeachingIt.getInstance().getConnector().getTablePrefix() + "groupsusers` values (?, ?)");
-			preparedStatement.setInt(1, id);
-			preparedStatement.setInt(2, group.getGroupID());
-			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));

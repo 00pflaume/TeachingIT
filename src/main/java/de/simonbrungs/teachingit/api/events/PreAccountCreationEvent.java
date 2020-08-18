@@ -2,8 +2,8 @@ package de.simonbrungs.teachingit.api.events;
 
 public class PreAccountCreationEvent extends Event {
 	private boolean cancel = false;
-	private String username;
-	private String email;
+	private final String username;
+	private final String email;
 	private byte activated;
 
 	public PreAccountCreationEvent(String pUserName, String pEmail, byte pActive) {
@@ -17,13 +17,13 @@ public class PreAccountCreationEvent extends Event {
 		return "CreateAccountEvent";
 	}
 
-	public void setCanceld(boolean pCancel) {
-		cancel = pCancel;
-	}
-
 	@Override
 	public boolean isCanceld() {
 		return cancel;
+	}
+
+	public void setCanceld(boolean pCancel) {
+		cancel = pCancel;
 	}
 
 	public String getEmail() {

@@ -1,11 +1,11 @@
 package de.simonbrungs.teachingit.protection;
 
+import de.simonbrungs.teachingit.api.events.Listener;
+import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
+
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import de.simonbrungs.teachingit.api.events.Listener;
-import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
 
 public class DosProtection implements Listener<SocketAcceptedEvent> {
 	HashMap<String, Integer> counter = new HashMap<>();

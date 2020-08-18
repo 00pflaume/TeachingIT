@@ -8,13 +8,13 @@ import java.sql.*;
 import java.util.logging.Level;
 
 public class MySQLConnector {
-	private String user;
-	private String password;
-	private int port;
-	private String database;
-	private String tablePrefix;
-	private String host;
 	private static MySQLConnector instance;
+	private final String user;
+	private final String password;
+	private final int port;
+	private final String database;
+	private final String tablePrefix;
+	private final String host;
 
 	public MySQLConnector(String pUser, String pPassword, int pPort, String pHost, String ptablePrefix,
 	                      String pDatabase) {
@@ -97,7 +97,7 @@ public class MySQLConnector {
 				add = "&allowPublicKeyRetrieval=true&useSSL=false";
 			}
 			con = DriverManager.getConnection(
-					"jdbc:mysql://" + host + ":" + port + "/?user=" + user + "&password=" + password +"&serverTimezone="+TeachingIt.getInstance().getConfig().getProperty("ServerTimeZone")+ add);
+					"jdbc:mysql://" + host + ":" + port + "/?user=" + user + "&password=" + password + "&serverTimezone=" + TeachingIt.getInstance().getConfig().getProperty("ServerTimeZone") + add);
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));

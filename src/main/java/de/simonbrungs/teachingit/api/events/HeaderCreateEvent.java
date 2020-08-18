@@ -5,7 +5,7 @@ import de.simonbrungs.teachingit.api.users.TempUser;
 public class HeaderCreateEvent extends Event {
 	private boolean canceld = false;
 	private String header = "";
-	private TempUser user;
+	private final TempUser user;
 
 	public HeaderCreateEvent(TempUser pUser) {
 		user = pUser;
@@ -25,16 +25,16 @@ public class HeaderCreateEvent extends Event {
 		return canceld;
 	}
 
-	public void setHeader(String pHeader) {
-		header = pHeader;
+	@Override
+	public void setCanceld(boolean pCanceld) {
+		canceld = pCanceld;
 	}
 
 	public String getHeader() {
 		return header;
 	}
 
-	@Override
-	public void setCanceld(boolean pCanceld) {
-		canceld = pCanceld;
+	public void setHeader(String pHeader) {
+		header = pHeader;
 	}
 }

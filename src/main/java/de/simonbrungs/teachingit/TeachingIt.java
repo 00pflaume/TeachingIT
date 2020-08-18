@@ -1,21 +1,5 @@
 package de.simonbrungs.teachingit;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Calendar;
-import java.util.Properties;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
-import java.util.logging.XMLFormatter;
-
 import de.simonbrungs.teachingit.api.Console;
 import de.simonbrungs.teachingit.api.events.EventExecuter;
 import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
@@ -28,40 +12,25 @@ import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
 import de.simonbrungs.teachingit.protection.DosProtection;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
+import java.io.*;
+import java.util.Calendar;
+import java.util.Properties;
+import java.util.logging.*;
+
 public class TeachingIt {
 	private static TeachingIt main;
+	public final String PREFIX = "[TeachingIt] ";
 	private Webserver webserver;
 	private Properties config;
 	private boolean shouldClose = false;
 	private Console console;
 	private PluginManager pluginManager;
-	public final String PREFIX = "[TeachingIt] ";
 	private EventExecuter eventExecuter;
 	private MySQLConnector connector;
 	private GroupManager groupManager;
 	private AccountManager accountManager;
 	private FileHandler fh;
 	private Logger logger;
-
-	public static void main(String[] args) {
-		new TeachingIt();
-	}
-
-	public String getIncludeContentURL() {
-		return getHomeDirectory() + "include/";
-	}
-
-	public GroupManager getGroupManager() {
-		return groupManager;
-	}
-
-	public Logger getLogger() {
-		return logger;
-	}
-
-	public AccountManager getAccountManager() {
-		return accountManager;
-	}
 
 	public TeachingIt() {
 		try {
@@ -142,6 +111,30 @@ public class TeachingIt {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			shutDown(1);
 		}
+	}
+
+	public static void main(String[] args) {
+		new TeachingIt();
+	}
+
+	public static TeachingIt getInstance() {
+		return main;
+	}
+
+	public String getIncludeContentURL() {
+		return getHomeDirectory() + "include/";
+	}
+
+	public GroupManager getGroupManager() {
+		return groupManager;
+	}
+
+	public Logger getLogger() {
+		return logger;
+	}
+
+	public AccountManager getAccountManager() {
+		return accountManager;
 	}
 
 	private void registerListeners() {
@@ -229,10 +222,6 @@ public class TeachingIt {
 
 	public boolean getShouldClose() {
 		return shouldClose;
-	}
-
-	public static TeachingIt getInstance() {
-		return main;
 	}
 
 	public Console getConsole() {

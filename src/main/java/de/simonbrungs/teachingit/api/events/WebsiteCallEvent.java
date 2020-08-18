@@ -4,7 +4,7 @@ import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class WebsiteCallEvent extends Event {
 	private boolean isCanceld = false;
-	private TempUser user;
+	private final TempUser user;
 
 	public WebsiteCallEvent(TempUser user) {
 		this.user = user;

@@ -1,14 +1,11 @@
 package de.simonbrungs.teachingit.webserver;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import de.simonbrungs.teachingit.TeachingIt;
+import de.simonbrungs.teachingit.api.events.*;
+import de.simonbrungs.teachingit.api.users.Account;
+import de.simonbrungs.teachingit.api.users.TempUser;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URLDecoder;
@@ -20,19 +17,10 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.simonbrungs.teachingit.TeachingIt;
-import de.simonbrungs.teachingit.api.events.ContentCreateEvent;
-import de.simonbrungs.teachingit.api.events.EventExecuter;
-import de.simonbrungs.teachingit.api.events.HeaderCreateEvent;
-import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
-import de.simonbrungs.teachingit.api.events.WebsiteCallEvent;
-import de.simonbrungs.teachingit.api.users.Account;
-import de.simonbrungs.teachingit.api.users.TempUser;
-
 public class Webserver {
-	private boolean shouldStop = false;
-	private Thread webserverThread;
 	public final String PREFIX = "[Webserver] ";
+	private boolean shouldStop = false;
+	private final Thread webserverThread;
 
 	public Webserver(final long maxPOSTSize, final int pPort) {
 		webserverThread = new Thread(new Runnable() {
@@ -49,10 +37,10 @@ public class Webserver {
 				while (!shouldStop) {
 					try {
 						try (Socket socket = serverSocket.accept();
-								InputStream input = socket.getInputStream();
-								BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-								OutputStream output = socket.getOutputStream();
-								PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
+						     InputStream input = socket.getInputStream();
+						     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+						     OutputStream output = socket.getOutputStream();
+						     PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
 							SocketAcceptedEvent sae = new SocketAcceptedEvent(
 									(new StringTokenizer(socket.getRemoteSocketAddress().toString(), ":")).nextToken());
 							EventExecuter.getInstance().executeEvent(sae);
@@ -98,9 +86,9 @@ public class Webserver {
 													.getErrorPageGenerator().getErrorPageNotFound(contentCreateEvent);
 										response += "<title>" + contentCreateEvent.getTitle() + "</title>" + "</head>"
 												+ TeachingIt.getInstance().getPluginManager().getTheme()
-														.getBodyStart(user)
+												.getBodyStart(user)
 												+ contentCreateEvent.getContent() + TeachingIt.getInstance()
-														.getPluginManager().getTheme().getBodyEnd(user)
+												.getPluginManager().getTheme().getBodyEnd(user)
 												+ "</body></html>";
 										writer.println("HTTP/1.0 200 OK");
 										writer.println("Content-Type: text/html; charset=ISO-8859-1");
@@ -130,10 +118,16 @@ public class Webserver {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
+	public void stop() {
+		shouldStop = true;
+		webserverThread.stop();
+	}
+
 	private class InputProcessor {
 		private boolean postAccepted = true;
 		private HashMap<String, Object> postContent = new HashMap<>();
-		private ArrayList<String> input = new ArrayList<>();
+		private final ArrayList<String> input = new ArrayList<>();
 
 		public InputProcessor(BufferedReader reader, long pMaxPOSTSize) {
 			String line;
@@ -165,11 +159,7 @@ public class Webserver {
 						final String contentHeader = "Content-Length: ";
 						if (line.startsWith(contentHeader)) {
 							contentLength = Integer.parseInt(line.substring(contentHeader.length()));
-							if (contentLength <= pMaxPOSTSize) {
-								postAccepted = true;
-							} else {
-								postAccepted = false;
-							}
+							postAccepted = contentLength <= pMaxPOSTSize;
 						}
 					}
 				} catch (IOException e) {
@@ -187,7 +177,7 @@ public class Webserver {
 						body += ((char) c);
 					}
 				}
-				raw += (body.toString());
+				raw += (body);
 				postContent = parseQuery(raw);
 			} catch (IOException e) {
 				postAccepted = false;
@@ -265,11 +255,5 @@ public class Webserver {
 			}
 			return path;
 		}
-	}
-
-	@SuppressWarnings("deprecation")
-	public void stop() {
-		shouldStop = true;
-		webserverThread.stop();
 	}
 }
