@@ -38,9 +38,11 @@ public class Webserver {
 					try {
 						try (Socket socket = serverSocket.accept();
 						     InputStream input = socket.getInputStream();
-						     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+						     InputStreamReader inputStreamReader = new InputStreamReader(input);
+						     BufferedReader reader = new BufferedReader(inputStreamReader);
 						     OutputStream output = socket.getOutputStream();
-						     PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
+						     OutputStreamWriter outputStreamWriter = new OutputStreamWriter(output);
+						     PrintWriter writer = new PrintWriter(outputStreamWriter)) {
 							SocketAcceptedEvent sae = new SocketAcceptedEvent(
 									(new StringTokenizer(socket.getRemoteSocketAddress().toString(), ":")).nextToken());
 							EventExecutor.getInstance().executeEvent(sae);
@@ -98,6 +100,12 @@ public class Webserver {
 									}
 								}
 							}
+							input.reset();
+							inputStreamReader.reset();
+							reader.reset();
+							output.flush();
+							outputStreamWriter.flush();
+							writer.flush();
 						} catch (IOException ignored) {
 						} catch (Exception e) {
 							StringWriter sw = new StringWriter();
