@@ -43,8 +43,8 @@ public class Webserver {
 						     PrintWriter writer = new PrintWriter(new OutputStreamWriter(output))) {
 							SocketAcceptedEvent sae = new SocketAcceptedEvent(
 									(new StringTokenizer(socket.getRemoteSocketAddress().toString(), ":")).nextToken());
-							EventExecuter.getInstance().executeEvent(sae);
-							if (!sae.isCanceld()) {
+							EventExecutor.getInstance().executeEvent(sae);
+							if (!sae.isCanceled()) {
 								InputProcessor inputprocessor = new InputProcessor(reader, pMaxPOSTSize);
 								String path = inputprocessor.getPath();
 								String ipAddress = (new StringTokenizer(socket.getRemoteSocketAddress().toString(),
@@ -65,19 +65,19 @@ public class Webserver {
 								else
 									user.setUserVar("postaccepted", "true");
 								WebsiteCallEvent websiteCallEvent = new WebsiteCallEvent(user);
-								TeachingIt.getInstance().getEventExecuter().executeEvent(websiteCallEvent);
-								if (!websiteCallEvent.isCanceld()) {
+								TeachingIt.getInstance().getEventExecutor().executeEvent(websiteCallEvent);
+								if (!websiteCallEvent.isCanceled()) {
 									{
 										String response = "<html><head>";
 										HeaderCreateEvent headerCreateEvent = new HeaderCreateEvent(user);
-										TeachingIt.getInstance().getEventExecuter().executeEvent(headerCreateEvent);
+										TeachingIt.getInstance().getEventExecutor().executeEvent(headerCreateEvent);
 										if (headerCreateEvent.getHeader() != null) {
 											response += headerCreateEvent.getHeader();
 										}
 										response = response
 												+ TeachingIt.getInstance().getPluginManager().getTheme().getHeader();
 										ContentCreateEvent contentCreateEvent = new ContentCreateEvent(user);
-										TeachingIt.getInstance().getEventExecuter().executeEvent(contentCreateEvent);
+										TeachingIt.getInstance().getEventExecutor().executeEvent(contentCreateEvent);
 										if (contentCreateEvent.getTitle() == null)
 											contentCreateEvent.setTitle(
 													TeachingIt.getInstance().getConfig().getProperty("SiteName"));
@@ -98,7 +98,7 @@ public class Webserver {
 									}
 								}
 							}
-						} catch (IOException iox) {
+						} catch (IOException ignored) {
 						} catch (Exception e) {
 							StringWriter sw = new StringWriter();
 							e.printStackTrace(new PrintWriter(sw));
@@ -124,7 +124,7 @@ public class Webserver {
 		webserverThread.stop();
 	}
 
-	private class InputProcessor {
+	private static class InputProcessor {
 		private final ArrayList<String> input = new ArrayList<>();
 		private boolean postAccepted = true;
 		private HashMap<String, Object> postContent = new HashMap<>();
@@ -138,8 +138,8 @@ public class Webserver {
 				return;
 			}
 			input.add(line);
-			String raw = "";
-			raw += line;
+			StringBuilder raw = new StringBuilder();
+			raw.append(line);
 			boolean isPost = false;
 			if (line != null)
 				isPost = line.startsWith("POST");
@@ -154,7 +154,7 @@ public class Webserver {
 							break;
 						}
 					input.add(line);
-					raw += ('\n' + line);
+					raw.append('\n').append(line);
 					if (isPost && postAccepted) {
 						final String contentHeader = "Content-Length: ";
 						if (line.startsWith(contentHeader)) {
@@ -168,17 +168,17 @@ public class Webserver {
 				}
 			}
 			try {
-				String body = "";
+				StringBuilder body = new StringBuilder();
 				if (isPost) {
-					int c = 0;
+					int c;
 					for (int i = 0; i < contentLength; i++) {
 						c = reader.read();
 						postAccepted = false;
-						body += ((char) c);
+						body.append((char) c);
 					}
 				}
-				raw += (body);
-				postContent = parseQuery(raw);
+				raw.append(body);
+				postContent = parseQuery(raw.toString());
 			} catch (IOException e) {
 				postAccepted = false;
 				e.printStackTrace();
@@ -215,7 +215,7 @@ public class Webserver {
 							values.add(value);
 
 						} else if (obj instanceof String) {
-							List<String> values = new ArrayList<String>();
+							List<String> values = new ArrayList<>();
 							values.add((String) obj);
 							values.add(value);
 							parameters.put(key, values);

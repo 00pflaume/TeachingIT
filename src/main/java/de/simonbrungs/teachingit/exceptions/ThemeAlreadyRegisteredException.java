@@ -1,6 +1,6 @@
 package de.simonbrungs.teachingit.exceptions;
 
-public class ThemeAlreadyRegisterdException extends Exception {
+public class ThemeAlreadyRegisteredException extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
@@ -11,6 +11,6 @@ public class ThemeAlreadyRegisterdException extends Exception {
 
 	@Override
 	public String getMessage() {
-		return "A theme is already registred.";
+		return "A theme is already registered.";
 	}
 }

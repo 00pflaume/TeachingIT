@@ -4,7 +4,7 @@ import de.simonbrungs.teachingit.api.users.Account;
 
 public class AfterAccountCreationEvent extends Event {
 	private final Account account;
-	private boolean isCanceld = false;
+	private boolean isCanceled = false;
 
 	public AfterAccountCreationEvent(Account pAccount) {
 		account = pAccount;
@@ -20,13 +20,13 @@ public class AfterAccountCreationEvent extends Event {
 	}
 
 	@Override
-	public boolean isCanceld() {
-		return isCanceld;
+	public boolean isCanceled() {
+		return isCanceled;
 	}
 
 	@Override
-	public void setCanceld(boolean pCanceld) {
-		isCanceld = pCanceld;
+	public void setCanceled(boolean pCanceled) {
+		isCanceled = pCanceled;
 	}
 
 }

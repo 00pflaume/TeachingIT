@@ -18,12 +18,12 @@ public class PreAccountCreationEvent extends Event {
 	}
 
 	@Override
-	public boolean isCanceld() {
+	public boolean isCanceled() {
 		return cancel;
 	}
 
-	public void setCanceld(boolean pCancel) {
-		cancel = pCancel;
+	public void setCanceled(boolean pCanceled) {
+		cancel = pCanceled;
 	}
 
 	public String getEmail() {

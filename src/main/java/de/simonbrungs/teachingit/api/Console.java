@@ -11,7 +11,7 @@ import java.util.logging.Level;
 public class Console {
 	private final static String PREFIX = "[CONSOLE] ";
 	private static Console instance = null;
-	private final HashMap<String, Command> registerdCommands = new HashMap<>();
+	private final HashMap<String, Command> registeredCommands = new HashMap<>();
 
 	public Console() throws IllegalAccessException {
 		if (instance != null)
@@ -24,19 +24,19 @@ public class Console {
 	}
 
 	public void registerCommand(Command pCommand, String pCommandName) {
-		registerdCommands.put(pCommandName.toLowerCase(), pCommand);
+		registeredCommands.put(pCommandName.toLowerCase(), pCommand);
 	}
 
 	public void commandsReader() {
 		Scanner scanner = new Scanner(System.in);
 		while (!TeachingIt.getInstance().getShouldClose()) {
 			String scanned = scanner.nextLine();
-			String removed = scanned;
+			String removed;
 			while (!(removed = scanned.replace("  ", " ")).equals(scanned))
 				scanned = removed;
-			ArrayList<String> commandWithArgs = new ArrayList<String>(Arrays.asList(scanned.split(" ")));
+			ArrayList<String> commandWithArgs = new ArrayList<>(Arrays.asList(scanned.split(" ")));
 			if (!commandWithArgs.isEmpty()) {
-				Command command = registerdCommands.get(commandWithArgs.get(0).toLowerCase());
+				Command command = registeredCommands.get(commandWithArgs.get(0).toLowerCase());
 				if (command != null) {
 					String commandName = commandWithArgs.get(0);
 					commandWithArgs.remove(0);

@@ -2,7 +2,7 @@ package de.simonbrungs.teachingit.api.events;
 
 public class SocketAcceptedEvent extends Event {
 	private final String ip;
-	private boolean canceld = false;
+	private boolean canceled = false;
 
 	public SocketAcceptedEvent(String pIP) {
 		ip = pIP;
@@ -18,13 +18,13 @@ public class SocketAcceptedEvent extends Event {
 	}
 
 	@Override
-	public boolean isCanceld() {
-		return canceld;
+	public boolean isCanceled() {
+		return canceled;
 	}
 
 	@Override
-	public void setCanceld(boolean pCanceld) {
-		canceld = pCanceld;
+	public void setCanceled(boolean pCanceled) {
+		canceled = pCanceled;
 	}
 
 }

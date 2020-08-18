@@ -7,33 +7,33 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-public class EventExecuter {
-	private static EventExecuter eventExecuter;
-	private final ArrayList<ListenerEntry> registredEvents = new ArrayList<>();
+public class EventExecutor {
+	private static EventExecutor eventExecutor;
+	private final ArrayList<ListenerEntry> registeredEvents = new ArrayList<>();
 
-	public EventExecuter() {
-		eventExecuter = this;
+	public EventExecutor() {
+		eventExecutor = this;
 	}
 
-	public static EventExecuter getInstance() {
-		return eventExecuter;
+	public static EventExecutor getInstance() {
+		return eventExecutor;
 	}
 
 	public void registerListener(Listener<?> pListener, Class<? extends Event> pClass, int pPriority) {
 		ListenerEntry entry = new ListenerEntry(pListener, pClass, pPriority);
-		registredEvents.add(entry);
-		sortByListenerPriority(registredEvents);
+		registeredEvents.add(entry);
+		sortByListenerPriority(registeredEvents);
 	}
 
 	private void sortByListenerPriority(ArrayList<ListenerEntry> pToSort) {
 		if (pToSort.size() > 1) {
 			ArrayList<ListenerEntry> smaller = new ArrayList<>();
 			ArrayList<ListenerEntry> bigger = new ArrayList<>();
-			ListenerEntry piviot = pToSort.get(0);
+			ListenerEntry pivot = pToSort.get(0);
 			pToSort.remove(0);
 			while (!pToSort.isEmpty()) {
 				ListenerEntry actual = pToSort.get(0);
-				if (actual.getPriority() < piviot.getPriority()) {
+				if (actual.getPriority() < pivot.getPriority()) {
 					smaller.add(actual);
 				} else {
 					bigger.add(actual);
@@ -43,13 +43,13 @@ public class EventExecuter {
 			sortByListenerPriority(smaller);
 			sortByListenerPriority(bigger);
 			pToSort.addAll(smaller);
-			pToSort.add(piviot);
+			pToSort.add(pivot);
 			pToSort.addAll(bigger);
 		}
 	}
 
 	public void executeEvent(Event pEvent) {
-		for (ListenerEntry listenerEntry : registredEvents) {
+		for (ListenerEntry listenerEntry : registeredEvents) {
 			if (pEvent.getClass().isAssignableFrom(listenerEntry.getToExecuteEventType())) {
 				try {
 					listenerEntry.getExecutiveListener().executeEvent(pEvent);
@@ -58,14 +58,14 @@ public class EventExecuter {
 					e.printStackTrace(new PrintWriter(sw));
 					TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 				}
-				if (pEvent.isCanceld()) {
+				if (pEvent.isCanceled()) {
 					return;
 				}
 			}
 		}
 	}
 
-	private class ListenerEntry {
+	private static class ListenerEntry {
 		private final int priority;
 		private final Listener<?> listener;
 		private final Class<? extends Event> eventClass;

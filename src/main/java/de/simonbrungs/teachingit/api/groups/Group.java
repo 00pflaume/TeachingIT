@@ -198,8 +198,7 @@ public class Group {
 			for (Group group : TeachingIt.getInstance().getGroupManager().getGroups()) {
 				if (group != this) {
 					if (group.isSuperGroup(this)) {
-						for (Account account : group.getUsersInGroup())
-							accounts.add(account);
+						accounts.addAll(group.getUsersInGroup());
 					}
 				}
 			}
@@ -224,7 +223,7 @@ public class Group {
 	}
 
 	public void removePermission(String pPermission) {
-		removePermission(pPermission);
+		removePermission(new Permission(pPermission));
 	}
 
 	public void removePermission(Permission pPermission) {

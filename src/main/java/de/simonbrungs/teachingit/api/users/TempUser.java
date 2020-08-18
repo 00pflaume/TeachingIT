@@ -8,7 +8,6 @@ public class TempUser {
 	private final HashMap<String, Object> postRequests;
 	private final HashMap<String, String> userVars = new HashMap<>();
 	private Account account;
-	private String[] test;
 
 	public TempUser(String pPath, Account pAccount, String pIPAddress, HashMap<String, Object> pPostRequests) {
 		path = pPath;
@@ -18,7 +17,7 @@ public class TempUser {
 	}
 
 	/**
-	 * Cause of Security reasons the first sended POST is ignored. Cause of that
+	 * Cause of Security reasons the first sent POST is ignored. Cause of that
 	 * always put in your form at first an input which is hidden
 	 *
 	 * @param pKey
@@ -29,7 +28,7 @@ public class TempUser {
 	}
 
 	/**
-	 * As soon as the site is builded up this is getting deleted
+	 * As soon as the site is built up this is getting deleted
 	 *
 	 * @param pKey   The key for the value
 	 * @param pValue The value that should be set
@@ -39,7 +38,6 @@ public class TempUser {
 	}
 
 	public String getUserVar(String pKey) {
-		System.out.println(test[0] + test[1]);
 		return userVars.get(pKey);
 	}
 

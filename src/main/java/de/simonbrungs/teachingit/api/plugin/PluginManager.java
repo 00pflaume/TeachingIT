@@ -2,7 +2,7 @@ package de.simonbrungs.teachingit.api.plugin;
 
 import de.simonbrungs.teachingit.TeachingIt;
 import de.simonbrungs.teachingit.api.plugin.theme.Theme;
-import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
+import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisteredException;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +16,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class PluginManager {
-	private static final String PLUGINMANAGERPREFIX = "[PluginManager] ";
+	private static final String PLUGIN_MANAGER_PREFIX = "[PluginManager] ";
 	private static PluginManager instance = null;
 	private final ArrayList<Plugin> plugins = new ArrayList<>();
 	private Theme theme = null;
@@ -35,67 +35,61 @@ public class PluginManager {
 		return theme;
 	}
 
-	public boolean registerTheme(File pThemeJar) throws ThemeAlreadyRegisterdException {
+	public boolean registerTheme(File pThemeJar) throws ThemeAlreadyRegisteredException {
 		if (this.theme != null)
-			throw new ThemeAlreadyRegisterdException();
-		Properties propertieFile = getPropertieFile(pThemeJar);
-		if (propertieFile == null)
+			throw new ThemeAlreadyRegisteredException();
+		Properties propertyFile = getPropertyFile(pThemeJar);
+		if (propertyFile == null)
 			return false;
-		if (!checkPropertieFile(propertieFile)) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, PLUGINMANAGERPREFIX + "The Theme propertie file of "
+		if (!checkPropertyFile(propertyFile)) {
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, PLUGIN_MANAGER_PREFIX + "The Theme property file of "
 					+ pThemeJar.getName() + " is not correct. Needed information are missing");
 			return false;
 		}
 		try {
-			Theme theme = null;
-			theme = (Theme) loadPlugin(pThemeJar, propertieFile, Theme.class);
+			Theme theme;
+			theme = (Theme) loadPlugin(pThemeJar, propertyFile, Theme.class);
 			if (theme != null) {
 				TeachingIt.getInstance().getLogger().log(Level.INFO,
-						PLUGINMANAGERPREFIX + "The Theme " + propertieFile.getProperty("name") + " (version "
-								+ propertieFile.getProperty("version") + ") from " + propertieFile.getProperty("author")
+						PLUGIN_MANAGER_PREFIX + "The Theme " + propertyFile.getProperty("name") + " (version "
+								+ propertyFile.getProperty("version") + ") from " + propertyFile.getProperty("author")
 								+ " was successfully loaded.");
 				this.theme = theme;
 				return true;
 			} else {
 				TeachingIt.getInstance().getLogger().log(Level.WARNING,
-						PLUGINMANAGERPREFIX
+						PLUGIN_MANAGER_PREFIX
 								+ "The plugin could not be loaded. The given main class of the plugin does not "
 								+ " extend the class \"Theme\".");
 			}
 		} catch (ClassNotFoundException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, PLUGINMANAGERPREFIX + "The given main class \""
-					+ propertieFile.getProperty("main") + "\" could not be found.");
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, PLUGIN_MANAGER_PREFIX + "The given main class \""
+					+ propertyFile.getProperty("main") + "\" could not be found.");
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING,
-					PLUGINMANAGERPREFIX + "An error occurred while loading the theme \"" + pThemeJar.getName() + "\".");
+					PLUGIN_MANAGER_PREFIX + "An error occurred while loading the theme \"" + pThemeJar.getName() + "\".");
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-		} catch (SecurityException e) {
+		} catch (SecurityException | IllegalArgumentException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-		} catch (IllegalArgumentException e) {
-			StringWriter sw = new StringWriter();
-			e.printStackTrace(new PrintWriter(sw));
-
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 		}
 		return false;
 	}
 
-	private Object loadPlugin(File pPluginJar, Properties propertieFile, Class<?> pSearchedSuperClass)
+	private Object loadPlugin(File pPluginJar, Properties propertyFile, Class<?> pSearchedSuperClass)
 			throws InstantiationException, MalformedURLException, ClassNotFoundException, IllegalAccessException {
 		URLClassLoader loader = null;
 		try {
 			loader = new URLClassLoader(new URL[]{pPluginJar.toURI().toURL()});
-			Class<?> cl = loader.loadClass(propertieFile.getProperty("main"));
+			Class<?> cl = loader.loadClass(propertyFile.getProperty("main"));
 			if (pSearchedSuperClass.isAssignableFrom(cl)) {
 				Plugin instance = (Plugin) cl.getDeclaredConstructor().newInstance();
 				try {
@@ -126,7 +120,7 @@ public class PluginManager {
 				}
 			} catch (IOException e) {
 				TeachingIt.getInstance().getLogger().log(Level.WARNING,
-						PLUGINMANAGERPREFIX + "URLClassLoader could not be closed.");
+						PLUGIN_MANAGER_PREFIX + "URLClassLoader could not be closed.");
 				StringWriter sw = new StringWriter();
 				e.printStackTrace(new PrintWriter(sw));
 				TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
@@ -136,31 +130,31 @@ public class PluginManager {
 	}
 
 	public void registerPlugin(File pPluginJar) {
-		Properties propertieFile = getPropertieFile(pPluginJar);
-		if (propertieFile == null)
+		Properties propertyFile = getPropertyFile(pPluginJar);
+		if (propertyFile == null)
 			return;
-		if (!checkPropertieFile(propertieFile)) {
+		if (!checkPropertyFile(propertyFile)) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING,
-					PLUGINMANAGERPREFIX + "The plugin propertie file of " + pPluginJar.getName()
+					PLUGIN_MANAGER_PREFIX + "The plugin property file of " + pPluginJar.getName()
 							+ " is not correct. Needed information are missing");
 			return;
 		}
 		try {
-			Plugin pluginInstance = null;
-			pluginInstance = (Plugin) loadPlugin(pPluginJar, propertieFile, Plugin.class);
+			Plugin pluginInstance;
+			pluginInstance = (Plugin) loadPlugin(pPluginJar, propertyFile, Plugin.class);
 			if (pluginInstance != null) {
 				TeachingIt.getInstance().getLogger().log(Level.INFO,
-						PLUGINMANAGERPREFIX + "The plugin " + propertieFile.getProperty("name") + " (version "
-								+ propertieFile.getProperty("version") + ") from " + propertieFile.getProperty("author")
+						PLUGIN_MANAGER_PREFIX + "The plugin " + propertyFile.getProperty("name") + " (version "
+								+ propertyFile.getProperty("version") + ") from " + propertyFile.getProperty("author")
 								+ " was successfully enabled.");
 				plugins.add(pluginInstance);
 			} else {
 				TeachingIt.getInstance().getLogger().log(Level.WARNING,
-						PLUGINMANAGERPREFIX + "Error while loading plugin \"" + pPluginJar.getName() + "\".");
+						PLUGIN_MANAGER_PREFIX + "Error while loading plugin \"" + pPluginJar.getName() + "\".");
 			}
 		} catch (ClassNotFoundException e) {
-			TeachingIt.getInstance().getLogger().log(Level.WARNING, PLUGINMANAGERPREFIX + "The given plugin \""
-					+ propertieFile.getProperty("main") + "\" class could not be found.");
+			TeachingIt.getInstance().getLogger().log(Level.WARNING, PLUGIN_MANAGER_PREFIX + "The given plugin \""
+					+ propertyFile.getProperty("main") + "\" class could not be found.");
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 
@@ -168,7 +162,7 @@ public class PluginManager {
 		} catch (MalformedURLException | InstantiationException | IllegalAccessException | SecurityException
 				| IllegalArgumentException e) {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING,
-					PLUGINMANAGERPREFIX + "An error occurred while loading a plugin.");
+					PLUGIN_MANAGER_PREFIX + "An error occurred while loading a plugin.");
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 
@@ -176,22 +170,22 @@ public class PluginManager {
 		}
 	}
 
-	public boolean isThemeRegisterd() {
+	public boolean isThemeRegistered() {
 		return theme != null;
 	}
 
-	private Properties getPropertieFile(File pPluginJar) {
+	private Properties getPropertyFile(File pPluginJar) {
 		ZipFile zipFile = null;
 		Properties prop = new Properties();
 		try {
 			zipFile = new ZipFile(pPluginJar.getAbsolutePath());
-			ZipEntry propertieFileEntry = zipFile.getEntry("properties/plugin.properties");
-			if (propertieFileEntry == null) {
+			ZipEntry propertyFileEntry = zipFile.getEntry("properties/plugin.properties");
+			if (propertyFileEntry == null) {
 				TeachingIt.getInstance().getLogger().log(Level.WARNING,
-						PLUGINMANAGERPREFIX + "Propertie file missing in " + pPluginJar.getName() + ".");
+						PLUGIN_MANAGER_PREFIX + "Property file missing in " + pPluginJar.getName() + ".");
 				return null;
 			}
-			InputStream stream = zipFile.getInputStream(propertieFileEntry);
+			InputStream stream = zipFile.getInputStream(propertyFileEntry);
 			prop.load(stream);
 			return prop;
 		} catch (IOException e) {
@@ -201,19 +195,11 @@ public class PluginManager {
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			return null;
 		} finally {
-			if (zipFile != null) {
-				try {
-					zipFile.close();
-				} catch (IOException e) {
-					StringWriter sw = new StringWriter();
-					e.printStackTrace(new PrintWriter(sw));
-					TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-				}
-			}
+			TeachingIt.getInstance().closeStream(zipFile);
 		}
 	}
 
-	private boolean checkPropertieFile(Properties pProperties) {
+	private boolean checkPropertyFile(Properties pProperties) {
 		return pProperties.getProperty("main") != null && pProperties.getProperty("author") != null
 				&& pProperties.getProperty("version") != null && pProperties.getProperty("name") != null;
 	}

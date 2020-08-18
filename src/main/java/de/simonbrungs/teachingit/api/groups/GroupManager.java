@@ -24,7 +24,7 @@ public class GroupManager {
 		return groupManager;
 	}
 
-	public Group createGroup(String pGroupName, int pSupergroup, int pPermissionheight)
+	public Group createGroup(String pGroupName, int pSupergroup, int pPermissionHeight)
 			throws IllegalArgumentException {
 		if (pGroupName.length() > 128)
 			throw new IllegalArgumentException();
@@ -39,7 +39,7 @@ public class GroupManager {
 			preparedStatement.setString(1, pGroupName);
 			preparedStatement.setNull(2, 2);
 			preparedStatement.setInt(3, pSupergroup);
-			preparedStatement.setInt(4, pPermissionheight);
+			preparedStatement.setInt(4, pPermissionHeight);
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();

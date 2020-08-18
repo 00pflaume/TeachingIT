@@ -39,8 +39,8 @@ public class AccountManager {
 
 	public void clear() {
 		ArrayList<String> toRemove = new ArrayList<>();
-		Set<Entry<String, SessionKeyEntry>> entrys = sessionKeys.entrySet();
-		for (Entry<String, SessionKeyEntry> entry : entrys) {
+		Set<Entry<String, SessionKeyEntry>> entries = sessionKeys.entrySet();
+		for (Entry<String, SessionKeyEntry> entry : entries) {
 			if (entry.getValue().getCreationTime() < (System.currentTimeMillis() / 1000 - 86400)) {
 				toRemove.add(entry.getKey());
 			}
@@ -154,8 +154,8 @@ public class AccountManager {
 			return null;
 		Connection con = TeachingIt.getInstance().getConnector().createConnection();
 		PreAccountCreationEvent preAccountCreationEvent = new PreAccountCreationEvent(pUserName, pEmail, pActive);
-		TeachingIt.getInstance().getEventExecuter().executeEvent(preAccountCreationEvent);
-		if (preAccountCreationEvent.isCanceld())
+		TeachingIt.getInstance().getEventExecutor().executeEvent(preAccountCreationEvent);
+		if (preAccountCreationEvent.isCanceled())
 			return null;
 		try {
 			PreparedStatement preparedStatement = con.prepareStatement("insert into  `"
@@ -171,7 +171,7 @@ public class AccountManager {
 			preparedStatement.setByte(6, activated);
 			preparedStatement.executeUpdate();
 			Account account = getAccount(pUserName);
-			TeachingIt.getInstance().getEventExecuter().executeEvent(new AfterAccountCreationEvent(account));
+			TeachingIt.getInstance().getEventExecutor().executeEvent(new AfterAccountCreationEvent(account));
 			return account;
 		} catch (SQLException e) {
 			StringWriter sw = new StringWriter();
@@ -191,7 +191,7 @@ public class AccountManager {
 		if (pAccount == null)
 			return false;
 		AccountDeleteEvent accountDeleteEvent = new AccountDeleteEvent(pAccount);
-		TeachingIt.getInstance().getEventExecuter().executeEvent(accountDeleteEvent);
+		TeachingIt.getInstance().getEventExecutor().executeEvent(accountDeleteEvent);
 		if (!accountDeleteEvent.getShouldBeDeleted())
 			return false;
 		Connection con = TeachingIt.getInstance().getConnector().createConnection();
@@ -226,9 +226,9 @@ public class AccountManager {
 		try {
 			mDigest = MessageDigest.getInstance("SHA1");
 			byte[] result = mDigest.digest(pPassword.getBytes());
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < result.length; i++) {
-				sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
+			StringBuilder sb = new StringBuilder();
+			for (byte b : result) {
+				sb.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
 			}
 			return sb.toString();
 		} catch (NoSuchAlgorithmException e) {
@@ -239,7 +239,7 @@ public class AccountManager {
 		return null;
 	}
 
-	private class SessionKeyEntry {
+	private static class SessionKeyEntry {
 		private final long creationTime;
 		private final Object content;
 

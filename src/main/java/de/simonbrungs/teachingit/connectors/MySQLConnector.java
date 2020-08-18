@@ -16,7 +16,7 @@ public class MySQLConnector {
 	private final String tablePrefix;
 	private final String host;
 
-	public MySQLConnector(String pUser, String pPassword, int pPort, String pHost, String ptablePrefix,
+	public MySQLConnector(String pUser, String pPassword, int pPort, String pHost, String pTablePrefix,
 	                      String pDatabase) {
 		instance = this;
 		user = pUser;
@@ -24,7 +24,7 @@ public class MySQLConnector {
 		port = pPort;
 		host = pHost;
 		database = pDatabase;
-		tablePrefix = ptablePrefix;
+		tablePrefix = pTablePrefix;
 		importDatabase();
 	}
 
@@ -111,7 +111,7 @@ public class MySQLConnector {
 	public void closeConnection(Connection pConnection) {
 		try {
 			pConnection.close();
-		} catch (SQLException e) {
+		} catch (SQLException ignored) {
 		}
 	}
 

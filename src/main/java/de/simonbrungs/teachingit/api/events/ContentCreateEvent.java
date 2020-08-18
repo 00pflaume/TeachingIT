@@ -4,7 +4,7 @@ import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class ContentCreateEvent extends Event {
 	private final TempUser user;
-	private boolean canceld = false;
+	private boolean canceled = false;
 	private String content = null;
 	private String title = null;
 
@@ -18,12 +18,12 @@ public class ContentCreateEvent extends Event {
 	}
 
 	@Override
-	public boolean isCanceld() {
-		return canceld;
+	public boolean isCanceled() {
+		return canceled;
 	}
 
-	public void setCanceld(boolean pCanceld) {
-		canceld = pCanceld;
+	public void setCanceled(boolean pCanceled) {
+		canceled = pCanceled;
 	}
 
 	public String getContent() {

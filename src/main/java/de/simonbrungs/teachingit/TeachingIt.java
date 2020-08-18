@@ -1,14 +1,14 @@
 package de.simonbrungs.teachingit;
 
 import de.simonbrungs.teachingit.api.Console;
-import de.simonbrungs.teachingit.api.events.EventExecuter;
+import de.simonbrungs.teachingit.api.events.EventExecutor;
 import de.simonbrungs.teachingit.api.events.SocketAcceptedEvent;
 import de.simonbrungs.teachingit.api.groups.GroupManager;
 import de.simonbrungs.teachingit.api.plugin.PluginManager;
 import de.simonbrungs.teachingit.api.users.AccountManager;
 import de.simonbrungs.teachingit.commands.ShutDown;
 import de.simonbrungs.teachingit.connectors.MySQLConnector;
-import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisterdException;
+import de.simonbrungs.teachingit.exceptions.ThemeAlreadyRegisteredException;
 import de.simonbrungs.teachingit.protection.DosProtection;
 import de.simonbrungs.teachingit.webserver.Webserver;
 
@@ -25,7 +25,7 @@ public class TeachingIt {
 	private boolean shouldClose = false;
 	private Console console;
 	private PluginManager pluginManager;
-	private EventExecuter eventExecuter;
+	private EventExecutor eventExecutor;
 	private MySQLConnector connector;
 	private GroupManager groupManager;
 	private AccountManager accountManager;
@@ -84,7 +84,7 @@ public class TeachingIt {
 			connector = new MySQLConnector(config.getProperty("MySQLUser"), config.getProperty("MySQLPassword"),
 					Integer.parseInt(config.getProperty("MySQLPort")), config.getProperty("MySQLHost"),
 					config.getProperty("MySQLTablePrefix"), config.getProperty("MySQLDatabase"));
-			eventExecuter = new EventExecuter();
+			eventExecutor = new EventExecutor();
 			groupManager = new GroupManager();
 			accountManager = new AccountManager();
 			pluginManager = new PluginManager();
@@ -138,10 +138,10 @@ public class TeachingIt {
 	}
 
 	private void registerListeners() {
-		int mcpspu = Integer.parseInt(config.getProperty("MaxConnectsPerSecoundPerUser"));
-		int mcpsig = Integer.parseInt(config.getProperty("MaxConnectsPerSecoundsInGeneral"));
+		int mcpspu = Integer.parseInt(config.getProperty("MaxConnectsPerSecondsPerUser"));
+		int mcpsig = Integer.parseInt(config.getProperty("MaxConnectsPerSecondsInGeneral"));
 		if (mcpspu > 0 && mcpsig > 0)
-			EventExecuter.getInstance().registerListener(new DosProtection(mcpspu, mcpsig), SocketAcceptedEvent.class,
+			EventExecutor.getInstance().registerListener(new DosProtection(mcpspu, mcpsig), SocketAcceptedEvent.class,
 					-1);
 	}
 
@@ -186,7 +186,7 @@ public class TeachingIt {
 				getLogger().log(Level.WARNING, PREFIX + "An error occurred while loading the theme");
 				return false;
 			}
-		} catch (ThemeAlreadyRegisterdException e) {
+		} catch (ThemeAlreadyRegisteredException e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 
@@ -214,7 +214,7 @@ public class TeachingIt {
 			e.printStackTrace(new PrintWriter(sw));
 
 			TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-			getLogger().log(Level.WARNING, PREFIX + "Error while shuttingdown");
+			getLogger().log(Level.WARNING, PREFIX + "Error while shutting down");
 		} finally {
 			Runtime.getRuntime().exit(pExitState);
 		}
@@ -236,8 +236,8 @@ public class TeachingIt {
 		getConsole().registerCommand(shutdownCommand, "shutdown");
 	}
 
-	public EventExecuter getEventExecuter() {
-		return eventExecuter;
+	public EventExecutor getEventExecutor() {
+		return eventExecutor;
 	}
 
 	public String getHomeDirectory() {
@@ -256,8 +256,8 @@ public class TeachingIt {
 				prop.setProperty("WebServerPort", "80");
 				prop.setProperty("SiteName", "TeachingIt");
 				prop.setProperty("MaxPOSTSizeInBytes", "128000000");
-				prop.setProperty("MaxConnectsPerSecoundsInGeneral", "100");
-				prop.setProperty("MaxConnectsPerSecoundPerUser", "3");
+				prop.setProperty("MaxConnectsPerSecondsInGeneral", "100");
+				prop.setProperty("MaxConnectsPerSecondsPerUser", "3");
 				prop.setProperty("LogLevel", "INFO");
 				prop.setProperty("MySQLHost", "localhost");
 				prop.setProperty("MySQLPort", "3306");
@@ -275,15 +275,19 @@ public class TeachingIt {
 			io.printStackTrace();
 			return false;
 		} finally {
-			if (output != null) {
-				try {
-					output.close();
-				} catch (IOException e) {
-					StringWriter sw = new StringWriter();
-					e.printStackTrace(new PrintWriter(sw));
+			closeStream(output);
+		}
+	}
 
-					TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-				}
+	public void closeStream(Closeable stream) {
+		if (stream != null) {
+			try {
+				stream.close();
+			} catch (IOException e) {
+				StringWriter sw = new StringWriter();
+				e.printStackTrace(new PrintWriter(sw));
+
+				TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
 			}
 		}
 	}
@@ -303,16 +307,7 @@ public class TeachingIt {
 			ex.printStackTrace();
 			return null;
 		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					StringWriter sw = new StringWriter();
-					e.printStackTrace(new PrintWriter(sw));
-
-					TeachingIt.getInstance().getLogger().log(Level.WARNING, sw.toString());
-				}
-			}
+			closeStream(input);
 		}
 	}
 }

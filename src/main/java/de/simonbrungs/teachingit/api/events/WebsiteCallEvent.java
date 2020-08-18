@@ -4,7 +4,7 @@ import de.simonbrungs.teachingit.api.users.TempUser;
 
 public class WebsiteCallEvent extends Event {
 	private final TempUser user;
-	private boolean isCanceld = false;
+	private boolean isCanceled = false;
 
 	public WebsiteCallEvent(TempUser user) {
 		this.user = user;
@@ -16,12 +16,12 @@ public class WebsiteCallEvent extends Event {
 	}
 
 	@Override
-	public boolean isCanceld() {
-		return isCanceld;
+	public boolean isCanceled() {
+		return isCanceled;
 	}
 
-	public void setCanceld(boolean pCanceld) {
-		isCanceld = pCanceld;
+	public void setCanceled(boolean pCanceled) {
+		isCanceled = pCanceled;
 	}
 
 	public TempUser getUser() {
